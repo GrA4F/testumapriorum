@@ -199,6 +199,24 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
         
+        /* Погода */
+        .weather-card {
+            background: linear-gradient(135deg, rgba(79,172,254,0.35) 0%, rgba(0,242,254,0.35) 100%);
+            backdrop-filter: blur(10px); padding: 16px; border-radius: 16px;
+            margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .weather-icon { font-size: 36px; flex-shrink: 0; }
+        .weather-info { flex: 1; }
+        .weather-temp { font-size: 28px; font-weight: bold; }
+        .weather-desc { font-size: 13px; opacity: 0.9; margin-top: 2px; }
+        .weather-details { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+        .weather-refresh-btn {
+            background: rgba(255,255,255,0.2); border: none; color: white;
+            width: 34px; height: 34px; border-radius: 10px; font-size: 16px; cursor: pointer;
+        }
         .calories-card {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             padding: 20px;
@@ -729,7 +747,16 @@
             <div class="map-container" id="mapContainer">
                 <div id="map"></div>
             </div>
-            
+              <!-- Погода -->
+        <div class="weather-card" id="weatherCard" style="display:none">
+            <div class="weather-icon" id="weatherIcon">🌤️</div>
+            <div class="weather-info">
+                <div class="weather-temp" id="weatherTemp">--°C</div>
+                <div class="weather-desc" id="weatherDesc">Загрузка...</div>
+                <div class="weather-details" id="weatherDetails"></div>
+            </div>
+            <button class="weather-refresh-btn" onclick="loadWeather()" title="Обновить">🔄</button>
+        </div>
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-label">📍 Расстояние</div>
@@ -1148,7 +1175,43 @@
                 sessionStorage.removeItem(GPS_STATE_KEY);
             }
         }
-        
+        //  ПОГОДА (Open-Meteo — бесплатный, без ключа)
+// ============================================================
+async function loadWeather() {
+    if (!navigator.geolocation) return;
+    const card = document.getElementById('weatherCard');
+    if (settings.weather) card.style.display = 'flex';
+    document.getElementById('weatherDesc').textContent = 'Загрузка...';
+
+    navigator.geolocation.getCurrentPosition(async pos => {
+        try {
+            const lat = pos.coords.latitude.toFixed(4);
+            const lon = pos.coords.longitude.toFixed(4);
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m&timezone=auto&forecast_days=1`;
+            const res  = await fetch(url);
+            const data = await res.json();
+            const cw   = data.current_weather;
+            const wmoMap = {
+                0:'☀️ Ясно',1:'🌤️ Преимущественно ясно',2:'⛅ Переменная облачность',3:'☁️ Облачно',
+                45:'🌫️ Туман',48:'🌫️ Иней',51:'🌦️ Лёгкая морось',53:'🌦️ Морось',55:'🌧️ Сильная морось',
+                61:'🌧️ Дождь',63:'🌧️ Умеренный дождь',65:'🌧️ Сильный дождь',
+                71:'❄️ Снег',73:'❄️ Умеренный снег',75:'❄️ Сильный снег',
+                80:'🌦️ Ливень',81:'🌧️ Умеренный ливень',82:'⛈️ Сильный ливень',
+                95:'⛈️ Гроза',96:'⛈️ Гроза с градом',99:'⛈️ Гроза с крупным градом'
+            };
+            const descRaw = wmoMap[cw.weathercode] || '🌡️ Данные получены';
+            const [icon, ...rest] = descRaw.split(' ');
+            document.getElementById('weatherIcon').textContent = icon;
+            document.getElementById('weatherTemp').textContent = `${Math.round(cw.temperature)}°C`;
+            document.getElementById('weatherDesc').textContent = rest.join(' ');
+            const wind = cw.windspeed;
+            document.getElementById('weatherDetails').textContent = `💨 Ветер: ${Math.round(wind)} км/ч`;
+            weatherLoaded = true;
+        } catch(e) {
+            document.getElementById('weatherDesc').textContent = 'Нет данных';
+        }
+    }, () => { document.getElementById('weatherDesc').textContent = 'Нет доступа к GPS'; }, { maximumAge: 60000, timeout: 8000 });
+}
         // Восстановление состояния GPS
         function restoreGPSState() {
             const savedState = sessionStorage.getItem(GPS_STATE_KEY);
