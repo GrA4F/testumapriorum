@@ -84,7 +84,7 @@
             opacity: 0.8;
         }
         
-        .menu-btn {
+        .header-btn {
             background: rgba(255, 255, 255, 0.25);
             color: white;
             border: none;
@@ -569,7 +569,6 @@
             margin-top: 12px;
         }
         
-        /* Модальное окно для карты */
         .map-modal {
             display: none;
             position: fixed;
@@ -616,7 +615,83 @@
             border-radius: 16px;
         }
         
-        /* Адаптивность для маленьких экранов */
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .setting-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .setting-info {
+            flex: 1;
+        }
+        
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .setting-desc {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle.active {
+            background: #38ef7d;
+        }
+        
+        .toggle-slider {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle.active .toggle-slider {
+            transform: translateX(22px);
+        }
+        
+        .wake-lock-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .wake-lock-indicator.active {
+            display: flex;
+        }
+        
         @media (max-width: 380px) {
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
@@ -639,7 +714,6 @@
             }
         }
         
-        /* Для десктопа */
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -667,7 +741,7 @@
                         <div class="user-id" id="userId">ID: ---</div>
                     </div>
                 </div>
-                <button class="menu-btn" onclick="showMenu()">☰</button>
+                <button class="header-btn" onclick="showSettings()">⚙️</button>
             </div>
             
             <div class="status-bar inactive" id="statusBar">
@@ -798,6 +872,52 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Экран настроек -->
+        <div id="settingsScreen" class="screen">
+            <button class="back-btn" onclick="showWorkout()">← Назад</button>
+            <div class="screen-title">⚙️ Настройки</div>
+            
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">📍 Доступ к геолокации</div>
+                        <div class="setting-desc" id="locationPermText">Разрешено</div>
+                    </div>
+                    <div class="toggle active" id="locationToggle" onclick="toggleLocationPermission()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">🔔 Уведомления</div>
+                        <div class="setting-desc">Показывать уведомления о тренировке</div>
+                    </div>
+                    <div class="toggle active" id="notificationToggle" onclick="toggleSetting('notifications')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">🌙 Не выключать экран</div>
+                        <div class="setting-desc">Предотвращать блокировку во время тренировки</div>
+                    </div>
+                    <div class="toggle active" id="wakeLockToggle" onclick="toggleSetting('wakeLock')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">🗑️ Очистить все данные</div>
+                        <div class="setting-desc">Удалить все тренировки и настройки</div>
+                    </div>
+                    <button class="workout-btn btn-delete" onclick="clearAllData()">Очистить</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Модальное окно для карты маршрута -->
@@ -807,6 +927,12 @@
             <button class="map-modal-close" onclick="closeMapModal()">✕</button>
         </div>
         <div id="routeMap"></div>
+    </div>
+    
+    <!-- Индикатор Wake Lock -->
+    <div class="wake-lock-indicator" id="wakeLockIndicator">
+        <span>🔒</span>
+        <span>Экран не выключается</span>
     </div>
 
     <script>
@@ -827,8 +953,21 @@
         document.getElementById('userId').textContent = `ID: ${userId}`;
         document.getElementById('userAvatar').textContent = userInitials;
         
-        // Хранилище
+        // Ключи хранилища
         const STORAGE_KEY = `bikeTracker_${userId}`;
+        const SETTINGS_KEY = `bikeTracker_settings_${userId}`;
+        const PERMISSION_KEY = `bikeTracker_locationPermission_${userId}`;
+        
+        // Загрузка настроек
+        let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || JSON.stringify({
+            locationPermission: true,
+            notifications: true,
+            wakeLock: true
+        }));
+        
+        // Загрузка разрешения на геолокацию
+        let locationPermissionGranted = localStorage.getItem(PERMISSION_KEY) === 'true';
+        
         let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         
         // Переменные тренировки
@@ -847,9 +986,10 @@
         let map = null;
         let routeMap = null;
         let routeLine = null;
-        let currentGoalType = 'distance'; // distance, calories, time
+        let currentGoalType = 'distance';
         let goalValue = 10;
         let goalAchieved = false;
+        let wakeLock = null;
         
         // Элементы
         const startBtn = document.getElementById('startBtn');
@@ -883,6 +1023,72 @@
             updateGoalDisplay();
         });
         
+        // Сохранение настроек
+        function saveSettings() {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+        
+        // Переключение настроек
+        function toggleSetting(setting) {
+            settings[setting] = !settings[setting];
+            saveSettings();
+            updateSettingsUI();
+            
+            if (setting === 'wakeLock') {
+                if (settings.wakeLock && isTracking) {
+                    requestWakeLock();
+                } else {
+                    releaseWakeLock();
+                }
+            }
+        }
+        
+        // Переключение разрешения на геолокацию
+        function toggleLocationPermission() {
+            locationPermissionGranted = !locationPermissionGranted;
+            localStorage.setItem(PERMISSION_KEY, locationPermissionGranted);
+            updateSettingsUI();
+            
+            if (!locationPermissionGranted && isTracking) {
+                resetTracking();
+                tg.showAlert('Отслеживание остановлено. Разрешите доступ к геолокации для продолжения.');
+            }
+        }
+        
+        // Обновление UI настроек
+        function updateSettingsUI() {
+            document.getElementById('locationToggle').classList.toggle('active', locationPermissionGranted);
+            document.getElementById('locationPermText').textContent = locationPermissionGranted ? 'Разрешено' : 'Запрещено';
+            document.getElementById('notificationToggle').classList.toggle('active', settings.notifications);
+            document.getElementById('wakeLockToggle').classList.toggle('active', settings.wakeLock);
+        }
+        
+        // Wake Lock API
+        async function requestWakeLock() {
+            if (!settings.wakeLock) return;
+            
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    document.getElementById('wakeLockIndicator').classList.add('active');
+                    
+                    wakeLock.addEventListener('release', () => {
+                        document.getElementById('wakeLockIndicator').classList.remove('active');
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock не поддерживается:', err);
+            }
+        }
+        
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+                document.getElementById('wakeLockIndicator').classList.remove('active');
+            }
+        }
+        
         // Навигация
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -899,6 +1105,11 @@
             renderStats();
         }
         
+        function showSettings() {
+            showScreen('settingsScreen');
+            updateSettingsUI();
+        }
+        
         function showWorkout() {
             showScreen('workoutScreen');
         }
@@ -909,16 +1120,17 @@
                 message: 'Выберите действие',
                 buttons: [
                     {id: 'stats', type: 'default', text: '📊 Статистика'},
+                    {id: 'settings', type: 'default', text: '⚙️ Настройки'},
                     {id: 'history', type: 'default', text: '📋 История'},
                     {id: 'cancel', type: 'cancel', text: 'Отмена'}
                 ]
             }, (btnId) => {
                 if (btnId === 'stats') showStats();
+                else if (btnId === 'settings') showSettings();
                 else if (btnId === 'history') showHistory();
             });
         }
         
-        // Установка типа цели
         function setGoalType(type) {
             currentGoalType = type;
             document.querySelectorAll('.goal-type-btn').forEach(btn => btn.classList.remove('active'));
@@ -947,7 +1159,6 @@
             updateGoalDisplay();
         }
         
-        // Обновление отображения цели
         function updateGoalDisplay() {
             goalValueText.textContent = goalValue;
             let current = 0;
@@ -960,7 +1171,7 @@
                     current = parseInt(caloriesEl.textContent);
                     break;
                 case 'time':
-                    current = elapsedTime / 60000; // минуты
+                    current = elapsedTime / 60000;
                     break;
             }
             
@@ -970,44 +1181,71 @@
         }
         
         // Начало отслеживания
-        function startTracking() {
+        async function startTracking() {
+            // Проверка разрешения
+            if (!locationPermissionGranted) {
+                tg.showAlert('❌ Доступ к геолокации запрещен. Разрешите в настройках (⚙️)');
+                showSettings();
+                return;
+            }
+            
             if (!navigator.geolocation) {
                 tg.showAlert('Геолокация не поддерживается');
                 return;
             }
             
-            watchId = navigator.geolocation.watchPosition(
-                handlePosition,
-                handleError,
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 1000,
-                    timeout: 10000
+            // Запрос Wake Lock
+            if (settings.wakeLock) {
+                await requestWakeLock();
+            }
+            
+            // Запрос геолокации с оптимальными настройками для фона
+            try {
+                watchId = navigator.geolocation.watchPosition(
+                    handlePosition,
+                    handleError,
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 5000,
+                        timeout: 15000
+                    }
+                );
+                
+                isTracking = true;
+                isPaused = false;
+                startTime = Date.now();
+                goalAchieved = false;
+                
+                document.getElementById('mapContainer').classList.add('active');
+                setTimeout(initMap, 100);
+                
+                startTimer();
+                
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
+                pauseBtn.textContent = '⏸️ Пауза';
+                statusBar.textContent = '🟢 GPS активен - отслеживание';
+                statusBar.classList.remove('inactive', 'paused');
+                
+                tg.HapticFeedback.notificationOccurred('success');
+                
+                // Уведомление о фоновой работе
+                if (settings.notifications) {
+                    tg.showPopup({
+                        title: 'Отслеживание началось',
+                        message: 'Приложение будет работать в фоне. Не закрывайте Telegram полностью.',
+                        buttons: [{id: 'ok', type: 'ok', text: 'Понятно'}]
+                    });
                 }
-            );
-            
-            isTracking = true;
-            isPaused = false;
-            startTime = Date.now();
-            goalAchieved = false;
-            
-            document.getElementById('mapContainer').classList.add('active');
-            setTimeout(initMap, 100);
-            
-            startTimer();
-            
-            startBtn.disabled = true;
-            pauseBtn.disabled = false;
-            saveBtn.disabled = false;
-            resetBtn.disabled = false;
-            pauseBtn.textContent = '⏸️ Пауза';
-            statusBar.textContent = 'GPS активен - отслеживание';
-            statusBar.classList.remove('inactive', 'paused');
-            
-            tg.HapticFeedback.notificationOccurred('success');
+                
+            } catch (err) {
+                console.error('Ошибка GPS:', err);
+                tg.showAlert('Ошибка при запуске GPS. Проверьте настройки разрешения.');
+            }
         }
         
-        // Инициализация карты
         function initMap() {
             if (map) {
                 map.remove();
@@ -1019,7 +1257,6 @@
             routeLine = L.polyline([], {color: '#667eea', weight: 4}).addTo(map);
         }
         
-        // Обработка позиции
         function handlePosition(position) {
             if (isPaused) return;
             
@@ -1066,7 +1303,6 @@
             const calories = calculateCalories(totalDistance, weight);
             const avgSpeed = calculateAvgSpeed();
             
-            // Обновление UI
             distanceEl.textContent = totalDistance.toFixed(2);
             speedEl.textContent = speedKmh.toFixed(1);
             maxSpeedEl.textContent = maxSpeedValue.toFixed(1);
@@ -1078,7 +1314,6 @@
             checkGoals();
         }
         
-        // Проверка достижения целей
         function checkGoals() {
             if (goalAchieved) return;
             
@@ -1107,7 +1342,6 @@
             }
         }
         
-        // Таймер
         function startTimer() {
             timerInterval = setInterval(() => {
                 if (!isPaused) {
@@ -1130,25 +1364,23 @@
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
-        // Пауза
         function togglePause() {
             isPaused = !isPaused;
             
             if (isPaused) {
                 pauseBtn.textContent = '▶️ Продолжить';
-                statusBar.textContent = 'На паузе';
+                statusBar.textContent = '⏸️ На паузе';
                 statusBar.classList.add('paused');
                 startTime = Date.now() - elapsedTime;
             } else {
                 pauseBtn.textContent = '⏸️ Пауза';
-                statusBar.textContent = 'GPS активен - отслеживание';
+                statusBar.textContent = '🟢 GPS активен - отслеживание';
                 statusBar.classList.remove('paused');
             }
             
             tg.HapticFeedback.impactOccurred('light');
         }
         
-        // Подтверждение сохранения
         function confirmSaveWorkout() {
             const durationStr = timeEl.textContent;
             const distanceStr = totalDistance.toFixed(2);
@@ -1166,7 +1398,6 @@
             });
         }
         
-        // Сохранение
         function saveWorkout() {
             const weight = parseFloat(weightInput.value) || 70;
             const workout = {
@@ -1191,7 +1422,6 @@
             resetTracking();
         }
         
-        // Подтверждение сброса
         function confirmResetTracking() {
             tg.showPopup({
                 title: 'Сбросить тренировку?',
@@ -1205,7 +1435,6 @@
             });
         }
         
-        // Сброс
         function resetTracking() {
             if (watchId !== null) {
                 navigator.geolocation.clearWatch(watchId);
@@ -1215,6 +1444,8 @@
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
+            
+            releaseWakeLock();
             
             isTracking = false;
             isPaused = false;
@@ -1251,7 +1482,6 @@
             tg.HapticFeedback.impactOccurred('medium');
         }
         
-        // Отрисовка списка
         function renderWorkoutList() {
             if (workouts.length === 0) {
                 document.getElementById('workoutList').innerHTML = `
@@ -1293,7 +1523,6 @@
             }).join('');
         }
         
-        // Показать карту маршрута
         function showWorkoutMap(id) {
             const workout = workouts.find(w => w.id === id);
             if (!workout || !workout.route || workout.route.length === 0) return;
@@ -1319,7 +1548,6 @@
             }, 100);
         }
         
-        // Закрыть карту
         function closeMapModal() {
             document.getElementById('mapModal').classList.remove('active');
             if (routeMap) {
@@ -1328,7 +1556,6 @@
             }
         }
         
-        // Удаление
         function deleteWorkout(id) {
             tg.showPopup({
                 title: 'Удалить тренировку?',
@@ -1347,7 +1574,32 @@
             });
         }
         
-        // Статистика
+        function clearAllData() {
+            tg.showPopup({
+                title: '⚠️ Очистить все данные?',
+                message: 'Будут удалены ВСЕ тренировки и настройки. Это действие нельзя отменить!',
+                buttons: [
+                    {id: 'clear', type: 'destructive', text: 'Удалить всё'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, (btnId) => {
+                if (btnId === 'clear') {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(SETTINGS_KEY);
+                    localStorage.removeItem(PERMISSION_KEY);
+                    workouts = [];
+                    settings = {
+                        locationPermission: true,
+                        notifications: true,
+                        wakeLock: true
+                    };
+                    locationPermissionGranted = true;
+                    tg.showAlert('Все данные очищены');
+                    showWorkout();
+                }
+            });
+        }
+        
         function renderStats() {
             const totalWorkouts = workouts.length;
             const totalDistance = workouts.reduce((sum, w) => sum + w.distance, 0);
@@ -1393,7 +1645,6 @@
             `;
         }
         
-        // Вспомогательные функции
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1419,13 +1670,70 @@
         function handleError(error) {
             let message = 'Ошибка GPS';
             switch(error.code) {
-                case error.PERMISSION_DENIED: message = 'Разрешите доступ к GPS'; break;
-                case error.POSITION_UNAVAILABLE: message = 'GPS недоступен'; break;
-                case error.TIMEOUT: message = 'Превышено время ожидания'; break;
+                case error.PERMISSION_DENIED: 
+                    message = 'Разрешите доступ к GPS в настройках';
+                    locationPermissionGranted = false;
+                    localStorage.setItem(PERMISSION_KEY, 'false');
+                    break;
+                case error.POSITION_UNAVAILABLE: 
+                    message = 'GPS недоступен'; 
+                    break;
+                case error.TIMEOUT: 
+                    message = 'Превышено время ожидания'; 
+                    break;
             }
             statusBar.textContent = message;
             tg.showAlert(message);
         }
+        
+        // Обработка видимости страницы
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isTracking && !isPaused) {
+                console.log('Приложение свернуто, продолжаем отслеживание...');
+            }
+        });
+        
+        // Обработка закрытия страницы
+        window.addEventListener('beforeunload', () => {
+            if (isTracking) {
+                // Сохраняем состояние
+                sessionStorage.setItem('trackingState', JSON.stringify({
+                    isTracking: true,
+                    startTime: startTime,
+                    elapsedTime: elapsedTime,
+                    totalDistance: totalDistance,
+                    isPaused: isPaused
+                }));
+            }
+        });
+        
+        // Восстановление состояния при загрузке
+        window.addEventListener('load', () => {
+            const savedState = sessionStorage.getItem('trackingState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                if (state.isTracking) {
+                    tg.showPopup({
+                        title: 'Восстановить тренировку?',
+                        message: 'Найдена незавершенная тренировка. Продолжить?',
+                        buttons: [
+                            {id: 'continue', type: 'default', text: 'Продолжить'},
+                            {id: 'cancel', type: 'cancel', text: 'Начать заново'}
+                        ]
+                    }, (btnId) => {
+                        if (btnId === 'continue') {
+                            startTime = Date.now() - state.elapsedTime;
+                            elapsedTime = state.elapsedTime;
+                            totalDistance = state.totalDistance;
+                            isTracking = true;
+                            isPaused = state.isPaused;
+                            startTracking();
+                        }
+                        sessionStorage.removeItem('trackingState');
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>
