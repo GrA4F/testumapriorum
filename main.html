@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Вело Тренировка</title>
+    <title>Вело Тренировка Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,15 +18,15 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #1a1a2e);
-            color: var(--tg-theme-text-color, #ffffff);
-            padding: 16px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            padding: 12px;
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 100px;
         }
         
         .container {
-            max-width: 400px;
+            max-width: 450px;
             margin: 0 auto;
         }
         
@@ -31,10 +34,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            border-radius: 12px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
         }
         
         .user-info {
@@ -48,7 +52,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--tg-theme-button-color, #4CAF50);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -64,155 +68,197 @@
         
         .user-id {
             font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
+            opacity: 0.7;
         }
         
-        .history-btn {
-            background: var(--tg-theme-button-color, #4CAF50);
-            color: var(--tg-theme-button-text-color, white);
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            font-size: 18px;
             cursor: pointer;
-            white-space: nowrap;
             margin-left: 8px;
         }
         
-        .history-btn:active {
-            opacity: 0.8;
-        }
-        
-        h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
+        .status-bar {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 14px;
+            border-radius: 16px;
             text-align: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
         }
         
-        .subtitle {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #888);
-            text-align: center;
-            margin-bottom: 24px;
+        .status-bar.paused {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
         
-        .status {
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .status.active {
-            background: #4CAF50;
-            color: white;
+        .status-bar.inactive {
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .stat-card {
-            background: var(--tg-theme-secondary-bg-color, #16213e);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 16px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+        
+        .stat-card.primary {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            grid-column: 1 / -1;
         }
         
         .stat-label {
             font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
-            margin-bottom: 4px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .stat-value {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
-            color: var(--tg-theme-button-color, #4CAF50);
+            line-height: 1;
         }
         
-        .weight-input {
-            background: var(--tg-theme-secondary-bg-color, #16213e);
+        .stat-card.primary .stat-value {
+            font-size: 42px;
+            margin-top: 8px;
+        }
+        
+        .stat-unit {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-left: 2px;
+        }
+        
+        .weight-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
         }
         
-        .weight-input label {
-            display: block;
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
+        .weight-label {
+            font-size: 13px;
+            opacity: 0.8;
             margin-bottom: 8px;
         }
         
-        .weight-input input {
+        .weight-input {
             width: 100%;
             padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color, #1a1a2e);
-            color: var(--tg-theme-text-color, #ffffff);
-            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 18px;
             text-align: center;
+            font-weight: 600;
         }
         
-        .buttons {
+        .weight-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .calories-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .calories-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .calories-value {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        
+        .buttons-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 12px;
             margin-bottom: 12px;
         }
         
-        .buttons-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            padding: 16px;
+        .btn {
+            padding: 16px 24px;
             border: none;
-            border-radius: 12px;
-            font-size: 14px;
+            border-radius: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        button:active {
-            opacity: 0.8;
+        .btn:active {
+            transform: scale(0.96);
         }
         
-        #startBtn {
-            background: var(--tg-theme-button-color, #4CAF50);
-            color: var(--tg-theme-button-text-color, white);
-        }
-        
-        #pauseBtn {
-            background: var(--tg-theme-hint-color, #888);
-            color: white;
-        }
-        
-        #saveBtn {
-            background: #2196F3;
-            color: white;
-        }
-        
-        #resetBtn {
-            background: #f44336;
-            color: white;
-        }
-        
-        button:disabled {
+        .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-pause {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        
+        .btn-history {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            grid-column: 1 / -1;
         }
         
         .screen {
@@ -223,109 +269,15 @@
             display: block;
         }
         
-        .workout-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .workout-item {
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            padding: 16px;
-            border-radius: 12px;
-            position: relative;
-        }
-        
-        .workout-date {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            padding-right: 60px;
-        }
-        
-        .workout-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--tg-theme-hint-color, #888);
-        }
-        
-        .workout-stats span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .delete-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--tg-theme-hint-color, #888);
-        }
-        
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .info {
-            margin-top: 20px;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            border-radius: 8px;
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
-            text-align: center;
-        }
-        
-        .total-stats {
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .total-stats h3 {
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-        
-        .total-stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .total-stat {
-            text-align: center;
-        }
-        
-        .total-stat-value {
+        .screen-title {
             font-size: 24px;
             font-weight: bold;
-            color: var(--tg-theme-button-color, #4CAF50);
-        }
-        
-        .total-stat-label {
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
+            margin-bottom: 16px;
+            text-align: center;
         }
         
         .back-btn {
-            background: var(--tg-theme-hint-color, #888);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -333,19 +285,305 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             width: 100%;
         }
         
-        .back-btn:active {
+        .workout-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .workout-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .workout-date {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .workout-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .workout-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-export {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .workout-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+        }
+        
+        .workout-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.9;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.7;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .map-container {
+            height: 250px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .map-container.active {
+            display: block;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .chart-container.active {
+            display: block;
+        }
+        
+        .goal-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .goal-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .goal-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .goal-input {
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .goal-progress {
+            margin-top: 12px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+        
+        .goal-label {
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 24px;
+            border-radius: 20px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .modal-text {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .modal-btn.cancel {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .total-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .total-stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        .total-stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .total-stat-label {
+            font-size: 12px;
             opacity: 0.8;
         }
         
-        .screen-title {
-            font-size: 20px;
+        .records-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .record-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-info {
+            flex: 1;
+        }
+        
+        .record-title {
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .record-value {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .record-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .info-text {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0.8;
             text-align: center;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -361,30 +599,31 @@
                         <div class="user-id" id="userId">ID: ---</div>
                     </div>
                 </div>
-                <button class="history-btn" onclick="showHistory()">📋 Тренировки</button>
+                <button class="menu-btn" onclick="showMenu()">☰</button>
             </div>
             
-            <h1>🚴 Вело Тренировка</h1>
-            <p class="subtitle">Bike Tracker Pro</p>
-            
-            <div class="status" id="status">
+            <div class="status-bar inactive" id="statusBar">
                 GPS неактивен
             </div>
             
+            <div class="map-container" id="mapContainer">
+                <div id="map"></div>
+            </div>
+            
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card primary">
                     <div class="stat-label">Расстояние</div>
-                    <div class="stat-value" id="distance">0.00 км</div>
+                    <div class="stat-value"><span id="distance">0.00</span><span class="stat-unit">км</span></div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-label">Скорость</div>
-                    <div class="stat-value" id="speed">0.0 км/ч</div>
+                    <div class="stat-value"><span id="speed">0.0</span><span class="stat-unit">км/ч</span></div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-label">Макс. скорость</div>
-                    <div class="stat-value" id="maxSpeed">0.0 км/ч</div>
+                    <div class="stat-value"><span id="maxSpeed">0.0</span><span class="stat-unit">км/ч</span></div>
                 </div>
                 
                 <div class="stat-card">
@@ -394,47 +633,62 @@
                 
                 <div class="stat-card">
                     <div class="stat-label">Ср. скорость</div>
-                    <div class="stat-value" id="avgSpeed">0.0 км/ч</div>
+                    <div class="stat-value"><span id="avgSpeed">0.0</span><span class="stat-unit">км/ч</span></div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-label">Набор высоты</div>
-                    <div class="stat-value" id="elevation">0 м</div>
+                    <div class="stat-value"><span id="elevation">0</span><span class="stat-unit">м</span></div>
                 </div>
             </div>
             
-            <div class="weight-input">
-                <label>Вес (кг) для подсчета калорий</label>
-                <input type="number" id="weight" placeholder="70" value="70" min="30" max="200">
+            <div class="weight-section">
+                <div class="weight-label">⚖️ Вес (кг) для подсчета калорий</div>
+                <input type="number" class="weight-input" id="weight" placeholder="70" value="70" min="30" max="200">
             </div>
             
-            <div class="stat-card" style="margin-bottom: 20px;">
-                <div class="stat-label">Сожженные калории</div>
-                <div class="stat-value" id="calories">0 ккал</div>
+            <div class="calories-card">
+                <div class="calories-label">🔥 Сожженные калории</div>
+                <div class="calories-value"><span id="calories">0</span> ккал</div>
             </div>
             
-            <div class="buttons">
-                <button id="startBtn">Старт</button>
-                <button id="pauseBtn" disabled>Пауза</button>
+            <div class="goal-section">
+                <div class="goal-title">🎯 Цель тренировки</div>
+                <div class="goal-inputs">
+                    <input type="number" class="goal-input" id="goalDistance" placeholder="Цель (км)" value="10">
+                    <input type="number" class="goal-input" id="goalCalories" placeholder="Калории" value="300">
+                </div>
+                <div class="goal-progress">
+                    <div class="goal-label">
+                        <span>Прогресс</span>
+                        <span id="goalProgressText">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="goalProgress" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
             
-            <div class="buttons-row">
-                <button id="saveBtn" disabled>💾 Сохранить</button>
-                <button id="resetBtn" disabled>🗑️ Сбросить</button>
+            <div class="buttons-grid">
+                <button class="btn btn-start" id="startBtn">▶️ Старт</button>
+                <button class="btn btn-pause" id="pauseBtn" disabled>⏸️ Пауза</button>
+                <button class="btn btn-save" id="saveBtn" disabled>💾 Сохранить</button>
+                <button class="btn btn-reset" id="resetBtn" disabled>🗑️ Сброс</button>
+                <button class="btn btn-history" onclick="showHistory()">📋 История тренировок</button>
             </div>
             
-            <div class="info">
-                Для точного подсчета откройте страницу на смартфоне и разрешите доступ к геолокации.
+            <div class="info-text">
+                📍 Для точного отслеживания откройте на смартфоне и разрешите доступ к GPS
             </div>
         </div>
         
         <!-- Экран истории -->
         <div id="historyScreen" class="screen">
-            <button class="back-btn" onclick="showWorkout()">← Назад к тренировке</button>
+            <button class="back-btn" onclick="showWorkout()">← Назад</button>
             <div class="screen-title">📋 История тренировок</div>
             <div id="workoutList" class="workout-list">
                 <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-icon">📋</div>
                     <div>Пока нет сохраненных тренировок</div>
                 </div>
             </div>
@@ -442,51 +696,56 @@
         
         <!-- Экран статистики -->
         <div id="statsScreen" class="screen">
-            <button class="back-btn" onclick="showWorkout()">← Назад к тренировке</button>
-            <div class="screen-title"> Статистика</div>
+            <button class="back-btn" onclick="showWorkout()">← Назад</button>
+            <div class="screen-title">📊 Статистика</div>
             
             <div class="total-stats">
-                <h3>Общая статистика</h3>
-                <div class="total-stats-grid">
-                    <div class="total-stat">
-                        <div class="total-stat-value" id="totalWorkouts">0</div>
-                        <div class="total-stat-label">Тренировок</div>
-                    </div>
-                    <div class="total-stat">
-                        <div class="total-stat-value" id="totalDistance">0</div>
-                        <div class="total-stat-label">Всего км</div>
-                    </div>
-                    <div class="total-stat">
-                        <div class="total-stat-value" id="totalTime">0</div>
-                        <div class="total-stat-label">Часов</div>
-                    </div>
-                    <div class="total-stat">
-                        <div class="total-stat-value" id="totalCalories">0</div>
-                        <div class="total-stat-label">Ккал сожжено</div>
-                    </div>
+                <div class="total-stat-card">
+                    <div class="total-stat-value" id="totalWorkouts">0</div>
+                    <div class="total-stat-label">Тренировок</div>
+                </div>
+                <div class="total-stat-card">
+                    <div class="total-stat-value" id="totalDistance">0</div>
+                    <div class="total-stat-label">Всего км</div>
+                </div>
+                <div class="total-stat-card">
+                    <div class="total-stat-value" id="totalTime">0</div>
+                    <div class="total-stat-label">Часов</div>
+                </div>
+                <div class="total-stat-card">
+                    <div class="total-stat-value" id="totalCalories">0</div>
+                    <div class="total-stat-label">Ккал</div>
                 </div>
             </div>
             
-            <div class="total-stats">
-                <h3> Рекорды</h3>
-                <div class="workout-list" id="recordsList">
-                    <div class="empty-state">
-                        <div>Нет данных для отображения рекордов</div>
-                    </div>
+            <div class="screen-title" style="font-size: 18px; margin-top: 24px;">🏆 Рекорды</div>
+            <div id="recordsList" class="records-list">
+                <div class="empty-state">
+                    <div>Нет данных</div>
                 </div>
             </div>
-            
-            <button class="back-btn" onclick="showHistory()" style="background: var(--tg-theme-button-color, #4CAF50);">📋 К списку тренировок</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">Подтверждение</div>
+            <div class="modal-text" id="modalText">Вы уверены?</div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal()">Отмена</button>
+                <button class="modal-btn confirm" id="confirmBtn">Подтвердить</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
+        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
         
-        // Получение данных пользователя
+        // Данные пользователя
         const user = tg.initDataUnsafe.user || {};
         const userId = user.id || 'unknown';
         const userName = user.first_name ? 
@@ -494,16 +753,11 @@
             'Пользователь';
         const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
         
-        // Отображение данных пользователя
         document.getElementById('userName').textContent = userName;
         document.getElementById('userId').textContent = `ID: ${userId}`;
         document.getElementById('userAvatar').textContent = userInitials;
         
-        // Установка цветов под тему Telegram
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.backgroundColor || '#1a1a2e');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.textColor || '#ffffff');
-        
-        // Хранилище данных
+        // Хранилище
         const STORAGE_KEY = `bikeTracker_${userId}`;
         let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         
@@ -512,20 +766,27 @@
         let isTracking = false;
         let isPaused = false;
         let totalDistance = 0;
-        let maxSpeed = 0;
+        let maxSpeedValue = 0; // ИСПРАВЛЕНО: число, не строка
         let lastPosition = null;
         let startTime = null;
         let elapsedTime = 0;
         let timerInterval = null;
         let totalElevation = 0;
         let lastElevation = null;
+        let speedHistory = [];
+        let routePoints = [];
+        let map = null;
+        let routeLine = null;
+        let goalDistance = 10;
+        let goalCalories = 300;
+        let goalAchieved = false;
         
-        // Элементы DOM
+        // Элементы
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const saveBtn = document.getElementById('saveBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const statusEl = document.getElementById('status');
+        const statusBar = document.getElementById('statusBar');
         const distanceEl = document.getElementById('distance');
         const speedEl = document.getElementById('speed');
         const maxSpeedEl = document.getElementById('maxSpeed');
@@ -534,16 +795,21 @@
         const elevationEl = document.getElementById('elevation');
         const caloriesEl = document.getElementById('calories');
         const weightInput = document.getElementById('weight');
-        const workoutListEl = document.getElementById('workoutList');
-        const recordsListEl = document.getElementById('recordsList');
+        const goalDistanceInput = document.getElementById('goalDistance');
+        const goalCaloriesInput = document.getElementById('goalCalories');
+        const goalProgress = document.getElementById('goalProgress');
+        const goalProgressText = document.getElementById('goalProgressText');
         
-        // Обработчики событий
+        // Обработчики
         startBtn.addEventListener('click', startTracking);
         pauseBtn.addEventListener('click', togglePause);
         saveBtn.addEventListener('click', confirmSaveWorkout);
         resetBtn.addEventListener('click', confirmResetTracking);
         
-        // Навигация между экранами
+        goalDistanceInput.addEventListener('change', (e) => goalDistance = parseFloat(e.target.value) || 10);
+        goalCaloriesInput.addEventListener('change', (e) => goalCalories = parseFloat(e.target.value) || 300);
+        
+        // Навигация
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -552,45 +818,38 @@
         function showHistory() {
             showScreen('historyScreen');
             renderWorkoutList();
-            if (tg.BackButton) {
-                tg.BackButton.onClick(() => showWorkout());
-            }
         }
         
         function showStats() {
             showScreen('statsScreen');
             renderStats();
-            if (tg.BackButton) {
-                tg.BackButton.onClick(() => showWorkout());
-            }
         }
         
         function showWorkout() {
             showScreen('workoutScreen');
-            if (tg.BackButton) {
-                tg.BackButton.onClick(() => {
-                    if (isTracking) {
-                        tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
-                            if (confirmed) {
-                                resetTracking();
-                                tg.close();
-                            }
-                        });
-                    } else {
-                        tg.close();
-                    }
-                });
-            }
+        }
+        
+        function showMenu() {
+            tg.showPopup({
+                title: 'Меню',
+                message: 'Выберите действие',
+                buttons: [
+                    {id: 'stats', type: 'default', text: '📊 Статистика'},
+                    {id: 'history', type: 'default', text: '📋 История'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, (btnId) => {
+                if (btnId === 'stats') showStats();
+                else if (btnId === 'history') showHistory();
+            });
         }
         
         // Начало отслеживания
         function startTracking() {
             if (!navigator.geolocation) {
-                tg.showAlert('Геолокация не поддерживается вашим устройством');
+                tg.showAlert('Геолокация не поддерживается');
                 return;
             }
-            
-            tg.MainButton.showProgress();
             
             watchId = navigator.geolocation.watchPosition(
                 handlePosition,
@@ -605,19 +864,34 @@
             isTracking = true;
             isPaused = false;
             startTime = Date.now();
+            goalAchieved = false;
+            
+            document.getElementById('mapContainer').classList.add('active');
+            initMap();
             
             startTimer();
             
             startBtn.disabled = true;
             pauseBtn.disabled = false;
-            saveBtn.disabled = false;  // Кнопка сохранить активна сразу после старта
-            resetBtn.disabled = false; // Кнопка сброса тоже активна
-            pauseBtn.textContent = 'Пауза';
-            statusEl.textContent = 'GPS активен - отслеживание';
-            statusEl.classList.add('active');
+            saveBtn.disabled = false;
+            resetBtn.disabled = false;
+            pauseBtn.textContent = '⏸️ Пауза';
+            statusBar.textContent = 'GPS активен - отслеживание';
+            statusBar.classList.remove('inactive', 'paused');
             
-            tg.MainButton.hideProgress();
             tg.HapticFeedback.notificationOccurred('success');
+        }
+        
+        // Инициализация карты
+        function initMap() {
+            if (map) {
+                map.remove();
+            }
+            map = L.map('map').setView([55.7558, 37.6173], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            routeLine = L.polyline([], {color: '#667eea', weight: 4}).addTo(map);
         }
         
         // Обработка позиции
@@ -628,14 +902,16 @@
             const lon = position.coords.longitude;
             const speed = position.coords.speed;
             const altitude = position.coords.altitude;
-            const timestamp = position.timestamp;
+            
+            routePoints.push([lat, lon]);
+            if (routeLine) {
+                routeLine.setLatLngs(routePoints);
+                map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
+            }
             
             if (lastPosition) {
                 const distance = calculateDistance(
-                    lastPosition.lat,
-                    lastPosition.lon,
-                    lat,
-                    lon
+                    lastPosition.lat, lastPosition.lon, lat, lon
                 );
                 
                 if (distance < 0.5 && distance > 0) {
@@ -650,32 +926,54 @@
                 }
             }
             
-            lastPosition = { lat, lon, timestamp };
+            lastPosition = { lat, lon };
             lastElevation = altitude;
             
-            const speedKmh = speed ? (speed * 3.6).toFixed(1) : 0;
+            // ИСПРАВЛЕНО: сохраняем как число
+            const speedKmh = speed ? parseFloat((speed * 3.6).toFixed(1)) : 0;
             
-            if (speedKmh > maxSpeed) {
-                maxSpeed = speedKmh;
+            if (speedKmh > maxSpeedValue) {
+                maxSpeedValue = speedKmh;
             }
+            
+            speedHistory.push(speedKmh);
+            if (speedHistory.length > 100) speedHistory.shift();
             
             const weight = parseFloat(weightInput.value) || 70;
             const calories = calculateCalories(totalDistance, weight);
             const avgSpeed = calculateAvgSpeed();
             
-            distanceEl.textContent = totalDistance.toFixed(2) + ' км';
-            speedEl.textContent = speedKmh + ' км/ч';
-            maxSpeedEl.textContent = maxSpeed + ' км/ч';
-            elevationEl.textContent = Math.round(totalElevation) + ' м';
-            caloriesEl.textContent = calories + ' ккал';
-            avgSpeedEl.textContent = avgSpeed + ' км/ч';
+            // Обновление UI
+            distanceEl.textContent = totalDistance.toFixed(2);
+            speedEl.textContent = speedKmh.toFixed(1);
+            maxSpeedEl.textContent = maxSpeedValue.toFixed(1); // ИСПРАВЛЕНО
+            elevationEl.textContent = Math.round(totalElevation);
+            caloriesEl.textContent = calories;
+            avgSpeedEl.textContent = avgSpeed;
+            
+            updateGoalProgress(calories);
+            checkGoals(totalDistance, calories);
         }
         
-        // Расчет средней скорости
-        function calculateAvgSpeed() {
-            if (elapsedTime === 0 || totalDistance === 0) return 0;
-            const hours = elapsedTime / 3600000;
-            return (totalDistance / hours).toFixed(1);
+        // Обновление прогресса цели
+        function updateGoalProgress(calories) {
+            const distanceProgress = (totalDistance / goalDistance) * 100;
+            const caloriesProgress = (calories / goalCalories) * 100;
+            const progress = Math.max(distanceProgress, caloriesProgress);
+            
+            goalProgress.style.width = Math.min(progress, 100) + '%';
+            goalProgressText.textContent = Math.round(Math.min(progress, 100)) + '%';
+        }
+        
+        // Проверка достижения целей
+        function checkGoals(distance, calories) {
+            if (goalAchieved) return;
+            
+            if (distance >= goalDistance || calories >= goalCalories) {
+                goalAchieved = true;
+                tg.showAlert(`🎉 Поздравляем! Вы достигли цели!\n\n📏 ${distance.toFixed(2)} км\n🔥 ${calories} ккал`);
+                tg.HapticFeedback.notificationOccurred('success');
+            }
         }
         
         // Таймер
@@ -688,7 +986,6 @@
             }, 1000);
         }
         
-        // Обновление отображения времени
         function updateTimeDisplay() {
             const totalSeconds = Math.floor(elapsedTime / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -704,14 +1001,14 @@
             isPaused = !isPaused;
             
             if (isPaused) {
-                pauseBtn.textContent = 'Продолжить';
-                statusEl.textContent = 'На паузе';
-                statusEl.classList.remove('active');
+                pauseBtn.textContent = '▶️ Продолжить';
+                statusBar.textContent = 'На паузе';
+                statusBar.classList.add('paused');
                 startTime = Date.now() - elapsedTime;
             } else {
-                pauseBtn.textContent = 'Пауза';
-                statusEl.textContent = 'GPS активен - отслеживание';
-                statusEl.classList.add('active');
+                pauseBtn.textContent = '⏸️ Пауза';
+                statusBar.textContent = 'GPS активен - отслеживание';
+                statusBar.classList.remove('paused');
             }
             
             tg.HapticFeedback.impactOccurred('light');
@@ -723,33 +1020,32 @@
             const distanceStr = totalDistance.toFixed(2);
             const caloriesStr = calculateCalories(totalDistance, parseFloat(weightInput.value) || 70);
             
-            tg.showConfirm(
-                `Завершить и сохранить тренировку?\n\n` +
-                `📏 ${distanceStr} км\n` +
-                `⏱️ ${durationStr}\n` +
-                ` ${caloriesStr} ккал\n\n` +
-                `Тренировка будет завершена.`,
-                (confirmed) => {
-                    if (confirmed) {
-                        saveWorkout();
-                    }
-                }
-            );
+            tg.showPopup({
+                title: 'Завершить тренировку?',
+                message: `📏 ${distanceStr} км\n⏱️ ${durationStr}\n🔥 ${caloriesStr} ккал\n\nТренировка будет сохранена.`,
+                buttons: [
+                    {id: 'save', type: 'default', text: '💾 Сохранить'},
+                    {id: 'cancel', type: 'cancel', text: 'Продолжить'}
+                ]
+            }, (btnId) => {
+                if (btnId === 'save') saveWorkout();
+            });
         }
         
-        // Сохранение тренировки
+        // Сохранение
         function saveWorkout() {
             const weight = parseFloat(weightInput.value) || 70;
             const workout = {
                 id: Date.now(),
                 date: new Date().toISOString(),
                 distance: totalDistance,
-                maxSpeed: maxSpeed,
+                maxSpeed: maxSpeedValue,
                 avgSpeed: calculateAvgSpeed(),
                 duration: elapsedTime,
                 calories: calculateCalories(totalDistance, weight),
                 elevation: totalElevation,
-                weight: weight
+                weight: weight,
+                route: routePoints
             };
             
             workouts.unshift(workout);
@@ -758,21 +1054,21 @@
             tg.showAlert(`✅ Тренировка сохранена!\n\n📏 ${totalDistance.toFixed(2)} км\n⏱️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал`);
             tg.HapticFeedback.notificationOccurred('success');
             
-            // Сброс после сохранения
             resetTracking();
         }
         
         // Подтверждение сброса
         function confirmResetTracking() {
-            tg.showConfirm(
-                'Сбросить текущую тренировку?\n\nВсе данные будут потеряны!',
-                (confirmed) => {
-                    if (confirmed) {
-                        resetTracking();
-                        tg.HapticFeedback.notificationOccurred('warning');
-                    }
-                }
-            );
+            tg.showPopup({
+                title: 'Сбросить тренировку?',
+                message: '⚠️ Все данные будут потеряны!',
+                buttons: [
+                    {id: 'reset', type: 'destructive', text: '🗑️ Сбросить'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, (btnId) => {
+                if (btnId === 'reset') resetTracking();
+            });
         }
         
         // Сброс
@@ -789,45 +1085,53 @@
             isTracking = false;
             isPaused = false;
             totalDistance = 0;
-            maxSpeed = 0;
+            maxSpeedValue = 0;
             totalElevation = 0;
             lastPosition = null;
             lastElevation = null;
             elapsedTime = 0;
             startTime = null;
+            speedHistory = [];
+            routePoints = [];
+            goalAchieved = false;
+            
+            document.getElementById('mapContainer').classList.remove('active');
             
             startBtn.disabled = false;
             pauseBtn.disabled = true;
             saveBtn.disabled = true;
             resetBtn.disabled = true;
-            pauseBtn.textContent = 'Пауза';
-            statusEl.textContent = 'GPS неактивен';
-            statusEl.classList.remove('active');
+            pauseBtn.textContent = '⏸️ Пауза';
+            statusBar.textContent = 'GPS неактивен';
+            statusBar.classList.add('inactive');
+            statusBar.classList.remove('paused');
             
-            distanceEl.textContent = '0.00 км';
-            speedEl.textContent = '0.0 км/ч';
-            maxSpeedEl.textContent = '0.0 км/ч';
-            timeEl.textContent = '00:00:00';
-            avgSpeedEl.textContent = '0.0 км/ч';
-            elevationEl.textContent = '0 м';
-            caloriesEl.textContent = '0 ккал';
+            distanceEl.textContent = '0.00';
+            speedEl.textContent = '0.0';
+            maxSpeedEl.textContent = '0.0';
+            timeEl.textContent = '00:00';
+            avgSpeedEl.textContent = '0.0';
+            elevationEl.textContent = '0';
+            caloriesEl.textContent = '0';
+            goalProgress.style.width = '0%';
+            goalProgressText.textContent = '0%';
             
             tg.HapticFeedback.impactOccurred('medium');
         }
         
-        // Отрисовка списка тренировок
+        // Отрисовка списка
         function renderWorkoutList() {
             if (workouts.length === 0) {
-                workoutListEl.innerHTML = `
+                document.getElementById('workoutList').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-icon">📋</div>
                         <div>Пока нет сохраненных тренировок</div>
                     </div>
                 `;
                 return;
             }
             
-            workoutListEl.innerHTML = workouts.map(workout => {
+            document.getElementById('workoutList').innerHTML = workouts.map(workout => {
                 const date = new Date(workout.date);
                 const dateStr = date.toLocaleDateString('ru-RU');
                 const timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
@@ -836,41 +1140,72 @@
                 
                 return `
                     <div class="workout-item">
-                        <button class="delete-btn" onclick="deleteWorkout(${workout.id})">Удалить</button>
-                        <div class="workout-date">${dateStr} ${timeStr}</div>
+                        <div class="workout-header">
+                            <div class="workout-date">${dateStr} ${timeStr}</div>
+                            <div class="workout-actions">
+                                <button class="workout-btn btn-export" onclick="exportWorkout(${workout.id})">📤</button>
+                                <button class="workout-btn btn-delete" onclick="deleteWorkout(${workout.id})">🗑️</button>
+                            </div>
+                        </div>
                         <div class="workout-stats">
-                            <span>📏 ${workout.distance.toFixed(2)} км</span>
-                            <span>⏱️ ${durationHours}ч ${durationMinutes}м</span>
-                            <span> ${workout.avgSpeed} км/ч</span>
-                            <span>🔥 ${workout.calories} ккал</span>
-                            <span>🏔️ ${Math.round(workout.elevation)} м</span>
-                            <span>🚀 ${workout.maxSpeed} км/ч</span>
+                            <div class="workout-stat">📏 ${workout.distance.toFixed(2)} км</div>
+                            <div class="workout-stat">⏱️ ${durationHours}ч ${durationMinutes}м</div>
+                            <div class="workout-stat">⚡ ${workout.avgSpeed} км/ч</div>
+                            <div class="workout-stat">🔥 ${workout.calories} ккал</div>
+                            <div class="workout-stat">🏔️ ${Math.round(workout.elevation)} м</div>
+                            <div class="workout-stat">🚀 ${workout.maxSpeed} км/ч</div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
         
-        // Удаление тренировки
-        let workoutToDelete = null;
-        
+        // Удаление
         function deleteWorkout(id) {
-            workoutToDelete = id;
-            tg.showConfirm(
-                'Вы действительно хотите удалить эту тренировку?',
-                (confirmed) => {
-                    if (confirmed) {
-                        workouts = workouts.filter(w => w.id !== workoutToDelete);
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-                        renderWorkoutList();
-                        tg.HapticFeedback.notificationOccurred('success');
-                        workoutToDelete = null;
-                    }
+            tg.showPopup({
+                title: 'Удалить тренировку?',
+                message: 'Это действие нельзя отменить',
+                buttons: [
+                    {id: 'delete', type: 'destructive', text: 'Удалить'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, (btnId) => {
+                if (btnId === 'delete') {
+                    workouts = workouts.filter(w => w.id !== id);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+                    renderWorkoutList();
+                    tg.HapticFeedback.notificationOccurred('success');
                 }
-            );
+            });
         }
         
-        // Отрисовка статистики
+        // Экспорт в GPX
+        function exportWorkout(id) {
+            const workout = workouts.find(w => w.id === id);
+            if (!workout) return;
+            
+            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            gpx += '<gpx version="1.1" creator="BikeTracker">\n<trk>\n';
+            gpx += `<name>Тренировка ${new Date(workout.date).toLocaleDateString('ru-RU')}</name>\n`;
+            gpx += '<trkseg>\n';
+            
+            workout.route.forEach(point => {
+                gpx += `<trkpt lat="${point[0]}" lon="${point[1]}"></trkpt>\n`;
+            });
+            
+            gpx += '</trkseg>\n</trk>\n</gpx>';
+            
+            const blob = new Blob([gpx], {type: 'application/gpx+xml'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workout_${id}.gpx`;
+            a.click();
+            
+            tg.showAlert('📤 Тренировка экспортирована в GPX');
+        }
+        
+        // Статистика
         function renderStats() {
             const totalWorkouts = workouts.length;
             const totalDistance = workouts.reduce((sum, w) => sum + w.distance, 0);
@@ -883,35 +1218,35 @@
             document.getElementById('totalCalories').textContent = totalCalories;
             
             if (workouts.length === 0) {
-                recordsListEl.innerHTML = '<div class="empty-state"><div>Нет данных для отображения рекордов</div></div>';
+                document.getElementById('recordsList').innerHTML = '<div class="empty-state"><div>Нет данных</div></div>';
                 return;
             }
             
             const maxDistance = workouts.reduce((max, w) => w.distance > max.distance ? w : max, workouts[0]);
-            const maxSpeedWorkout = workouts.reduce((max, w) => parseFloat(w.maxSpeed) > parseFloat(max.maxSpeed) ? w : max, workouts[0]);
+            const maxSpeedWorkout = workouts.reduce((max, w) => w.maxSpeed > max.maxSpeed ? w : max, workouts[0]);
             const maxCalories = workouts.reduce((max, w) => w.calories > max.calories ? w : max, workouts[0]);
             
-            recordsListEl.innerHTML = `
-                <div class="workout-item">
-                    <div class="workout-date">🏆 Самая длинная</div>
-                    <div class="workout-stats">
-                        <span>📏 ${maxDistance.distance.toFixed(2)} км</span>
-                        <span>${new Date(maxDistance.date).toLocaleDateString('ru-RU')}</span>
+            document.getElementById('recordsList').innerHTML = `
+                <div class="record-item">
+                    <div class="record-info">
+                        <div class="record-title">🏆 Самая длинная</div>
+                        <div class="record-value">${new Date(maxDistance.date).toLocaleDateString('ru-RU')}</div>
                     </div>
+                    <div class="record-badge">${maxDistance.distance.toFixed(2)} км</div>
                 </div>
-                <div class="workout-item">
-                    <div class="workout-date"> Максимальная скорость</div>
-                    <div class="workout-stats">
-                        <span> ${maxSpeedWorkout.maxSpeed} км/ч</span>
-                        <span>${new Date(maxSpeedWorkout.date).toLocaleDateString('ru-RU')}</span>
+                <div class="record-item">
+                    <div class="record-info">
+                        <div class="record-title">🚀 Макс. скорость</div>
+                        <div class="record-value">${new Date(maxSpeedWorkout.date).toLocaleDateString('ru-RU')}</div>
                     </div>
+                    <div class="record-badge">${maxSpeedWorkout.maxSpeed} км/ч</div>
                 </div>
-                <div class="workout-item">
-                    <div class="workout-date">🔥 Больше всего калорий</div>
-                    <div class="workout-stats">
-                        <span> ${maxCalories.calories} ккал</span>
-                        <span>${new Date(maxCalories.date).toLocaleDateString('ru-RU')}</span>
+                <div class="record-item">
+                    <div class="record-info">
+                        <div class="record-title">🔥 Больше калорий</div>
+                        <div class="record-value">${new Date(maxCalories.date).toLocaleDateString('ru-RU')}</div>
                     </div>
+                    <div class="record-badge">${maxCalories.calories} ккал</div>
                 </div>
             `;
         }
@@ -933,42 +1268,25 @@
             return Math.round(distanceKm * weightKg * 0.5);
         }
         
-        function handleError(error) {
-            console.error('GPS Error:', error);
-            let message = 'Ошибка GPS';
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    message = 'Разрешите доступ к геолокации';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message = 'Информация о местоположении недоступна';
-                    break;
-                case error.TIMEOUT:
-                    message = 'Превышено время ожидания GPS';
-                    break;
-            }
-            
-            statusEl.textContent = message;
-            tg.showAlert(message);
-            tg.HapticFeedback.notificationOccurred('error');
+        function calculateAvgSpeed() {
+            if (elapsedTime === 0 || totalDistance === 0) return 0;
+            const hours = elapsedTime / 3600000;
+            return (totalDistance / hours).toFixed(1);
         }
         
-        // Инициализация кнопки назад
-        if (tg.BackButton) {
-            tg.BackButton.onClick(() => {
-                if (isTracking) {
-                    tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
-                        if (confirmed) {
-                            resetTracking();
-                            tg.close();
-                        }
-                    });
-                } else {
-                    tg.close();
-                }
-            });
-            tg.BackButton.show();
+        function handleError(error) {
+            let message = 'Ошибка GPS';
+            switch(error.code) {
+                case error.PERMISSION_DENIED: message = 'Разрешите доступ к GPS'; break;
+                case error.POSITION_UNAVAILABLE: message = 'GPS недоступен'; break;
+                case error.TIMEOUT: message = 'Превышено время ожидания'; break;
+            }
+            statusBar.textContent = message;
+            tg.showAlert(message);
+        }
+        
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
         }
     </script>
 </body>
