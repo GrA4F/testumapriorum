@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Вело Тренировка</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #1a1a2e);
+            color: var(--tg-theme-text-color, #ffffff);
+            padding: 16px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #888);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .status {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .status.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #4CAF50);
+        }
+        
+        .weight-input {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .weight-input label {
+            display: block;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
+            margin-bottom: 8px;
+        }
+        
+        .weight-input input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color, #1a1a2e);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        button:active {
+            opacity: 0.8;
+        }
+        
+        #startBtn {
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+        }
+        
+        #pauseBtn {
+            background: var(--tg-theme-hint-color, #888);
+            color: white;
+        }
+        
+        #resetBtn {
+            background: #f44336;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚴 Вело Тренировка</h1>
+        <p class="subtitle">Bike Tracker</p>
+        
+        <div class="status" id="status">
+            GPS неактивен
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Пройденное расстояние</div>
+                <div class="stat-value" id="distance">0.00 км</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Текущая скорость</div>
+                <div class="stat-value" id="speed">0.0 км/ч</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Максимальная скорость</div>
+                <div class="stat-value" id="maxSpeed">0.0 км/ч</div>
+            </div>
+        </div>
+        
+        <div class="weight-input">
+            <label>Вес (кг)</label>
+            <input type="number" id="weight" placeholder="70" value="70" min="30" max="200">
+        </div>
+        
+        <div class="stat-card" style="margin-bottom: 20px;">
+            <div class="stat-label">Сожженные калории</div>
+            <div class="stat-value" id="calories">0 ккал</div>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn">Старт</button>
+            <button id="pauseBtn" disabled>Пауза</button>
+            <button id="resetBtn">Сброс</button>
+        </div>
+        
+        <div class="info">
+            Для точного подсчета разрешите доступ к геолокации
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        // Установка цветов под тему Telegram
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.backgroundColor || '#1a1a2e');
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.textColor || '#ffffff');
+        
+        let watchId = null;
+        let isTracking = false;
+        let isPaused = false;
+        let totalDistance = 0;
+        let maxSpeed = 0;
+        let lastPosition = null;
+        let startTime = null;
+        
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusEl = document.getElementById('status');
+        const distanceEl = document.getElementById('distance');
+        const speedEl = document.getElementById('speed');
+        const maxSpeedEl = document.getElementById('maxSpeed');
+        const caloriesEl = document.getElementById('calories');
+        const weightInput = document.getElementById('weight');
+        
+        startBtn.addEventListener('click', startTracking);
+        pauseBtn.addEventListener('click', togglePause);
+        resetBtn.addEventListener('click', resetTracking);
+        
+        function startTracking() {
+            if (!navigator.geolocation) {
+                tg.showAlert('Геолокация не поддерживается вашим устройством');
+                return;
+            }
+            
+            tg.MainButton.showProgress();
+            
+            watchId = navigator.geolocation.watchPosition(
+                handlePosition,
+                handleError,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 1000,
+                    timeout: 10000
+                }
+            );
+            
+            isTracking = true;
+            isPaused = false;
+            startTime = Date.now();
+            
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            pauseBtn.textContent = 'Пауза';
+            statusEl.textContent = 'GPS активен - отслеживание';
+            statusEl.classList.add('active');
+            
+            tg.MainButton.hideProgress();
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+        
+        function handlePosition(position) {
+            if (isPaused) return;
+            
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const speed = position.coords.speed; // м/с
+            const timestamp = position.timestamp;
+            
+            if (lastPosition) {
+                const distance = calculateDistance(
+                    lastPosition.lat,
+                    lastPosition.lon,
+                    lat,
+                    lon
+                );
+                
+                // Фильтруем нереалистичные значения
+                if (distance < 0.5 && distance > 0) {
+                    totalDistance += distance;
+                }
+            }
+            
+            lastPosition = { lat, lon, timestamp };
+            
+            const speedKmh = speed ? (speed * 3.6).toFixed(1) : 0;
+            
+            if (speedKmh > maxSpeed) {
+                maxSpeed = speedKmh;
+            }
+            
+            const weight = parseFloat(weightInput.value) || 70;
+            const calories = calculateCalories(totalDistance, weight);
+            
+            distanceEl.textContent = totalDistance.toFixed(2) + ' км';
+            speedEl.textContent = speedKmh + ' км/ч';
+            maxSpeedEl.textContent = maxSpeed + ' км/ч';
+            caloriesEl.textContent = calories + ' ккал';
+        }
+        
+        function handleError(error) {
+            console.error('GPS Error:', error);
+            let message = 'Ошибка GPS';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Разрешите доступ к геолокации';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Информация о местоположении недоступна';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Превышено время ожидания GPS';
+                    break;
+            }
+            
+            statusEl.textContent = message;
+            tg.showAlert(message);
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                pauseBtn.textContent = 'Продолжить';
+                statusEl.textContent = 'На паузе';
+                statusEl.classList.remove('active');
+            } else {
+                pauseBtn.textContent = 'Пауза';
+                statusEl.textContent = 'GPS активен - отслеживание';
+                statusEl.classList.add('active');
+            }
+            
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        function resetTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            isTracking = false;
+            isPaused = false;
+            totalDistance = 0;
+            maxSpeed = 0;
+            lastPosition = null;
+            startTime = null;
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            pauseBtn.textContent = 'Пауза';
+            statusEl.textContent = 'GPS неактивен';
+            statusEl.classList.remove('active');
+            
+            distanceEl.textContent = '0.00 км';
+            speedEl.textContent = '0.0 км/ч';
+            maxSpeedEl.textContent = '0.0 км/ч';
+            caloriesEl.textContent = '0 ккал';
+            
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Радиус Земли в км
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function calculateCalories(distanceKm, weightKg) {
+            // Приблизительно 0.5 ккал на кг веса на км для велосипеда
+            return Math.round(distanceKm * weightKg * 0.5);
+        }
+        
+        // Закрытие приложения по кнопке (опционально)
+        if (tg.BackButton) {
+            tg.BackButton.onClick(() => {
+                if (isTracking) {
+                    tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
+                        if (confirmed) {
+                            resetTracking();
+                            tg.close();
+                        }
+                    });
+                } else {
+                    tg.close();
+                }
+            });
+            tg.BackButton.show();
+        }
+    </script>
+</body>
+</html>
