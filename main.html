@@ -117,7 +117,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        /* ===== БЛОК ПОГОДЫ ===== */
         .weather-card {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             padding: 16px;
@@ -648,6 +647,7 @@
             overflow: hidden;
             display: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
         }
         
         .map-container.active {
@@ -657,6 +657,36 @@
         #map {
             height: 100%;
             width: 100%;
+        }
+        
+        /* Кнопка "Моя позиция" */
+        .locate-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .locate-btn:active {
+            transform: scale(0.9);
+            background: #f0f0f0;
+        }
+        
+        .locate-btn.active {
+            background: #4CAF50;
+            color: white;
         }
         
         .total-stats {
@@ -955,6 +985,7 @@
             
             <div class="map-container" id="mapContainer">
                 <div id="map"></div>
+                <button class="locate-btn" id="locateBtn" onclick="locateUser()" title="Моя позиция">📍</button>
             </div>
             
             <div class="stats-grid">
@@ -1189,6 +1220,7 @@
         let totalDistance = 0;
         let maxSpeedValue = 0;
         let lastPosition = null;
+        let startPosition = null; // Начальная позиция
         let startTime = null;
         let elapsedTime = 0;
         let timerInterval = null;
@@ -1198,6 +1230,8 @@
         let map = null;
         let routeMap = null;
         let routeLine = null;
+        let startMarker = null; // Маркер начала
+        let currentMarker = null; // Текущий маркер
         let currentGoalType = 'distance';
         let goalValue = 10;
         let goalAchieved = false;
@@ -1209,6 +1243,13 @@
         let weatherUpdateInterval = null;
         let lastWeatherCoords = null;
         let weatherFetchedForWorkout = false;
+        
+        // Фильтрация GPS - буфер скоростей для сглаживания
+        let speedBuffer = [];
+        const SPEED_BUFFER_SIZE = 5;
+        const MIN_MOVEMENT_DISTANCE = 5; // Минимальное расстояние для учета движения (метры)
+        const MAX_REALISTIC_SPEED = 50; // Максимальная реалистичная скорость для велосипеда (км/ч)
+        const MIN_SPEED_THRESHOLD = 1.5; // Минимальная скорость для учета движения (км/ч)
         
         // Элементы
         const startBtn = document.getElementById('startBtn');
@@ -1645,6 +1686,7 @@
                     maxSpeedValue: maxSpeedValue,
                     totalElevation: totalElevation,
                     lastPosition: lastPosition,
+                    startPosition: startPosition,
                     lastElevation: lastElevation,
                     routePoints: routePoints,
                     goalAchieved: goalAchieved,
@@ -1682,6 +1724,7 @@
                 maxSpeedValue = state.maxSpeedValue;
                 totalElevation = state.totalElevation;
                 lastPosition = state.lastPosition;
+                startPosition = state.startPosition;
                 lastElevation = state.lastElevation;
                 routePoints = state.routePoints || [];
                 goalAchieved = state.goalAchieved;
@@ -1796,12 +1839,14 @@
             maxSpeedValue = 0;
             totalElevation = 0;
             lastPosition = null;
+            startPosition = null;
             lastElevation = null;
             routePoints = [];
             elapsedTime = 0;
             startTime = Date.now();
             goalAchieved = false;
             weatherFetchedForWorkout = false;
+            speedBuffer = []; // Очистка буфера скоростей
             
             isTracking = true;
             isPaused = false;
@@ -1862,6 +1907,22 @@
             }
         }
         
+        // Функция для центрирования карты на текущей позиции
+        function locateUser() {
+            if (!lastPosition && !startPosition) {
+                tg.showAlert('Позиция еще не определена');
+                return;
+            }
+            
+            const pos = lastPosition || startPosition;
+            map.setView([pos.lat, pos.lon], 16);
+            
+            // Визуальная обратная связь
+            const btn = document.getElementById('locateBtn');
+            btn.classList.add('active');
+            setTimeout(() => btn.classList.remove('active'), 300);
+        }
+        
         function handlePosition(position) {
             if (isPaused) return;
             
@@ -1869,19 +1930,62 @@
             const lon = position.coords.longitude;
             const speed = position.coords.speed;
             const altitude = position.coords.altitude;
+            const accuracy = position.coords.accuracy;
+            
+            // Сохраняем стартовую позицию
+            if (!startPosition) {
+                startPosition = { lat, lon };
+                
+                // Добавляем маркер начала (зеленый)
+                if (map && !startMarker) {
+                    startMarker = L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#4CAF50;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        })
+                    }).addTo(map).bindPopup('📍 Старт');
+                }
+            }
+            
+            // Добавляем или обновляем текущий маркер (синий)
+            if (map) {
+                if (!currentMarker) {
+                    currentMarker = L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#2196F3;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        })
+                    }).addTo(map);
+                } else {
+                    currentMarker.setLatLng([lat, lon]);
+                }
+                
+                // Автоматически центрируем карту при движении
+                if (!map._ dragging || !map._ dragging._enabled || map.getZoom() < 15) {
+                    map.setView([lat, lon], 16);
+                }
+            }
             
             routePoints.push([lat, lon]);
             if (routeLine) {
                 routeLine.setLatLngs(routePoints);
-                if (routePoints.length > 1) {
-                    map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
-                }
             }
             
             if (lastPosition) {
                 const distance = calculateDistance(
                     lastPosition.lat, lastPosition.lon, lat, lon
                 );
+                
+                // ФИЛЬТРАЦИЯ: Игнорируем мелкие движения (< 5 метров)
+                if (distance * 1000 < MIN_MOVEMENT_DISTANCE) {
+                    // Слишком маленькое движение - считаем что стоим на месте
+                    speedEl.textContent = '0.0';
+                    return;
+                }
                 
                 if (distance < 0.5 && distance > 0) {
                     totalDistance += distance;
@@ -1915,9 +2019,50 @@
                 }
             }
             
-            const speedKmh = speed ? parseFloat((speed * 3.6).toFixed(1)) : 0;
+            // ФИЛЬТРАЦИЯ СКОРОСТИ
+            let speedKmh = 0;
             
-            if (speedKmh > maxSpeedValue) {
+            if (speed !== null && speed !== undefined) {
+                speedKmh = speed * 3.6; // м/с -> км/ч
+                
+                // Проверяем на реалистичность
+                if (speedKmh > MAX_REALISTIC_SPEED) {
+                    speedKmh = maxSpeedValue; // Используем предыдущую максимальную
+                }
+                
+                // Добавляем в буфер для сглаживания
+                speedBuffer.push(speedKmh);
+                if (speedBuffer.length > SPEED_BUFFER_SIZE) {
+                    speedBuffer.shift();
+                }
+                
+                // Вычисляем среднюю скорость из буфера
+                const avgBufferSpeed = speedBuffer.reduce((a, b) => a + b, 0) / speedBuffer.length;
+                
+                // Игнорируем очень низкие скорости (GPS дрейф)
+                if (avgBufferSpeed < MIN_SPEED_THRESHOLD) {
+                    speedKmh = 0;
+                } else {
+                    speedKmh = avgBufferSpeed;
+                }
+            } else {
+                // Если GPS не дает скорость, вычисляем из расстояния и времени
+                if (lastPosition && lastPosition.timestamp) {
+                    const timeDiff = (Date.now() - lastPosition.timestamp) / 3600000; // часы
+                    if (timeDiff > 0 && distance > 0) {
+                        speedKmh = distance / timeDiff;
+                        
+                        if (speedKmh > MAX_REALISTIC_SPEED || speedKmh < MIN_SPEED_THRESHOLD) {
+                            speedKmh = 0;
+                        }
+                    }
+                }
+            }
+            
+            lastPosition.timestamp = Date.now();
+            
+            // Обновляем максимальную скорость
+            if (speedKmh > maxSpeedValue && speedKmh > MIN_SPEED_THRESHOLD) {
                 maxSpeedValue = speedKmh;
             }
             
@@ -2045,6 +2190,7 @@
                 elevation: totalElevation,
                 weight: weight,
                 route: routePoints,
+                startPosition: startPosition,
                 weather: currentWeather ? {
                     temp: currentWeather.temp,
                     feelsLike: currentWeather.feelsLike,
@@ -2103,6 +2249,7 @@
             maxSpeedValue = 0;
             totalElevation = 0;
             lastPosition = null;
+            startPosition = null;
             lastElevation = null;
             elapsedTime = 0;
             startTime = null;
@@ -2110,6 +2257,19 @@
             goalAchieved = false;
             gpsAlreadyRequested = false;
             weatherFetchedForWorkout = false;
+            speedBuffer = [];
+            
+            // Удаляем маркеры
+            if (map) {
+                if (startMarker) {
+                    map.removeLayer(startMarker);
+                    startMarker = null;
+                }
+                if (currentMarker) {
+                    map.removeLayer(currentMarker);
+                    currentMarker = null;
+                }
+            }
             
             document.getElementById('mapContainer').classList.remove('active');
             
@@ -2208,6 +2368,18 @@
                 }).addTo(routeMap);
                 
                 L.polyline(workout.route, {color: '#667eea', weight: 4}).addTo(routeMap);
+                
+                // Добавляем маркер начала
+                if (workout.startPosition) {
+                    L.marker([workout.startPosition.lat, workout.startPosition.lon], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#4CAF50;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        })
+                    }).addTo(routeMap).bindPopup('📍 Старт');
+                }
                 
                 if (workout.route.length > 1) {
                     const bounds = L.latLngBounds(workout.route);
