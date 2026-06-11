@@ -41,6 +41,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
         
         .user-avatar {
@@ -53,6 +54,7 @@
             justify-content: center;
             font-weight: bold;
             font-size: 16px;
+            flex-shrink: 0;
         }
         
         .user-name {
@@ -63,6 +65,23 @@
         .user-id {
             font-size: 12px;
             color: var(--tg-theme-hint-color, #888);
+        }
+        
+        .history-btn {
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+        
+        .history-btn:active {
+            opacity: 0.8;
         }
         
         h1 {
@@ -94,6 +113,7 @@
         
         .stats-grid {
             display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -112,7 +132,7 @@
         }
         
         .stat-value {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
         }
@@ -144,7 +164,14 @@
         
         .buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .buttons-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
             margin-bottom: 20px;
         }
@@ -184,31 +211,8 @@
         }
         
         button:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            background: var(--tg-theme-secondary-bg-color, #16213e);
-            padding: 4px;
-            border-radius: 12px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 12px;
-            background: transparent;
-            color: var(--tg-theme-text-color, #ffffff);
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .tab.active {
-            background: var(--tg-theme-button-color, #4CAF50);
         }
         
         .screen {
@@ -236,6 +240,7 @@
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 8px;
+            padding-right: 60px;
         }
         
         .workout-stats {
@@ -319,108 +324,76 @@
             color: var(--tg-theme-hint-color, #888);
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--tg-theme-bg-color, #1a1a2e);
-            padding: 24px;
-            border-radius: 16px;
-            max-width: 350px;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        
-        .modal-text {
+        .back-btn {
+            background: var(--tg-theme-hint-color, #888);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
             font-size: 14px;
-            color: var(--tg-theme-hint-color, #888);
+            font-weight: 600;
+            cursor: pointer;
             margin-bottom: 20px;
+            width: 100%;
         }
         
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
+        .back-btn:active {
+            opacity: 0.8;
         }
         
-        .modal-buttons button {
-            flex: 1;
-        }
-        
-        .elevation-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #888);
-            margin-top: 8px;
+        .screen-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">U</div>
-                <div>
-                    <div class="user-name" id="userName">Пользователь</div>
-                    <div class="user-id" id="userId">ID: ---</div>
-                </div>
-            </div>
-        </div>
-        
-        <h1>🚴 Вело Тренировка</h1>
-        <p class="subtitle">Bike Tracker Pro</p>
-        
         <!-- Экран тренировки -->
         <div id="workoutScreen" class="screen active">
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div class="user-name" id="userName">Пользователь</div>
+                        <div class="user-id" id="userId">ID: ---</div>
+                    </div>
+                </div>
+                <button class="history-btn" onclick="showHistory()">📋 Тренировки</button>
+            </div>
+            
+            <h1>🚴 Вело Тренировка</h1>
+            <p class="subtitle">Bike Tracker Pro</p>
+            
             <div class="status" id="status">
                 GPS неактивен
             </div>
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Пройденное расстояние</div>
+                    <div class="stat-label">Расстояние</div>
                     <div class="stat-value" id="distance">0.00 км</div>
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-label">Текущая скорость</div>
+                    <div class="stat-label">Скорость</div>
                     <div class="stat-value" id="speed">0.0 км/ч</div>
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-label">Максимальная скорость</div>
+                    <div class="stat-label">Макс. скорость</div>
                     <div class="stat-value" id="maxSpeed">0.0 км/ч</div>
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-label">Время тренировки</div>
+                    <div class="stat-label">Время</div>
                     <div class="stat-value" id="time">00:00</div>
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-label">Средняя скорость</div>
+                    <div class="stat-label">Ср. скорость</div>
                     <div class="stat-value" id="avgSpeed">0.0 км/ч</div>
                 </div>
                 
@@ -443,11 +416,11 @@
             <div class="buttons">
                 <button id="startBtn">Старт</button>
                 <button id="pauseBtn" disabled>Пауза</button>
-                <button id="saveBtn" disabled>Сохранить</button>
             </div>
             
-            <div class="buttons">
-                <button id="resetBtn" style="grid-column: 1 / -1;">Сбросить</button>
+            <div class="buttons-row">
+                <button id="saveBtn" disabled>💾 Сохранить</button>
+                <button id="resetBtn" disabled>🗑️ Сбросить</button>
             </div>
             
             <div class="info">
@@ -457,13 +430,8 @@
         
         <!-- Экран истории -->
         <div id="historyScreen" class="screen">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('workout')">Тренировка</button>
-                <button class="tab" onclick="switchTab('history')">История</button>
-                <button class="tab" onclick="switchTab('stats')">Статистика</button>
-            </div>
-            
-            <h3 style="margin-bottom: 16px;">История тренировок</h3>
+            <button class="back-btn" onclick="showWorkout()">← Назад к тренировке</button>
+            <div class="screen-title">📋 История тренировок</div>
             <div id="workoutList" class="workout-list">
                 <div class="empty-state">
                     <div class="empty-state-icon">📋</div>
@@ -474,14 +442,11 @@
         
         <!-- Экран статистики -->
         <div id="statsScreen" class="screen">
-            <div class="tabs">
-                <button class="tab" onclick="switchTab('workout')">Тренировка</button>
-                <button class="tab" onclick="switchTab('history')">История</button>
-                <button class="tab active" onclick="switchTab('stats')">Статистика</button>
-            </div>
+            <button class="back-btn" onclick="showWorkout()">← Назад к тренировке</button>
+            <div class="screen-title"> Статистика</div>
             
             <div class="total-stats">
-                <h3>📊 Общая статистика</h3>
+                <h3>Общая статистика</h3>
                 <div class="total-stats-grid">
                     <div class="total-stat">
                         <div class="total-stat-value" id="totalWorkouts">0</div>
@@ -503,25 +468,15 @@
             </div>
             
             <div class="total-stats">
-                <h3>🏆 Рекорды</h3>
+                <h3> Рекорды</h3>
                 <div class="workout-list" id="recordsList">
                     <div class="empty-state">
                         <div>Нет данных для отображения рекордов</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Модальное окно подтверждения -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">Подтверждение</div>
-            <div class="modal-text" id="modalText">Вы уверены?</div>
-            <div class="modal-buttons">
-                <button onclick="closeModal()" style="background: var(--tg-theme-hint-color, #888);">Отмена</button>
-                <button onclick="confirmAction()" id="confirmBtn" style="background: #f44336;">Удалить</button>
-            </div>
+            
+            <button class="back-btn" onclick="showHistory()" style="background: var(--tg-theme-button-color, #4CAF50);">📋 К списку тренировок</button>
         </div>
     </div>
 
@@ -585,24 +540,46 @@
         // Обработчики событий
         startBtn.addEventListener('click', startTracking);
         pauseBtn.addEventListener('click', togglePause);
-        saveBtn.addEventListener('click', saveWorkout);
-        resetBtn.addEventListener('click', resetTracking);
+        saveBtn.addEventListener('click', confirmSaveWorkout);
+        resetBtn.addEventListener('click', confirmResetTracking);
         
-        // Функции переключения экранов
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        // Навигация между экранами
+        function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            
-            if (tab === 'workout') {
-                document.getElementById('workoutScreen').classList.add('active');
-            } else if (tab === 'history') {
-                document.getElementById('historyScreen').classList.add('active');
-                renderWorkoutList();
-            } else if (tab === 'stats') {
-                document.getElementById('statsScreen').classList.add('active');
-                renderStats();
+            document.getElementById(screenId).classList.add('active');
+        }
+        
+        function showHistory() {
+            showScreen('historyScreen');
+            renderWorkoutList();
+            if (tg.BackButton) {
+                tg.BackButton.onClick(() => showWorkout());
+            }
+        }
+        
+        function showStats() {
+            showScreen('statsScreen');
+            renderStats();
+            if (tg.BackButton) {
+                tg.BackButton.onClick(() => showWorkout());
+            }
+        }
+        
+        function showWorkout() {
+            showScreen('workoutScreen');
+            if (tg.BackButton) {
+                tg.BackButton.onClick(() => {
+                    if (isTracking) {
+                        tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
+                            if (confirmed) {
+                                resetTracking();
+                                tg.close();
+                            }
+                        });
+                    } else {
+                        tg.close();
+                    }
+                });
             }
         }
         
@@ -633,7 +610,8 @@
             
             startBtn.disabled = true;
             pauseBtn.disabled = false;
-            saveBtn.disabled = true;
+            saveBtn.disabled = false;  // Кнопка сохранить активна сразу после старта
+            resetBtn.disabled = false; // Кнопка сброса тоже активна
             pauseBtn.textContent = 'Пауза';
             statusEl.textContent = 'GPS активен - отслеживание';
             statusEl.classList.add('active');
@@ -648,7 +626,7 @@
             
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            const speed = position.coords.speed; // м/с
+            const speed = position.coords.speed;
             const altitude = position.coords.altitude;
             const timestamp = position.timestamp;
             
@@ -660,12 +638,10 @@
                     lon
                 );
                 
-                // Фильтруем нереалистичные значения
                 if (distance < 0.5 && distance > 0) {
                     totalDistance += distance;
                 }
                 
-                // Подсчет набора высоты
                 if (altitude !== null && lastElevation !== null) {
                     const elevationGain = altitude - lastElevation;
                     if (elevationGain > 0) {
@@ -741,13 +717,28 @@
             tg.HapticFeedback.impactOccurred('light');
         }
         
+        // Подтверждение сохранения
+        function confirmSaveWorkout() {
+            const durationStr = timeEl.textContent;
+            const distanceStr = totalDistance.toFixed(2);
+            const caloriesStr = calculateCalories(totalDistance, parseFloat(weightInput.value) || 70);
+            
+            tg.showConfirm(
+                `Завершить и сохранить тренировку?\n\n` +
+                `📏 ${distanceStr} км\n` +
+                `⏱️ ${durationStr}\n` +
+                ` ${caloriesStr} ккал\n\n` +
+                `Тренировка будет завершена.`,
+                (confirmed) => {
+                    if (confirmed) {
+                        saveWorkout();
+                    }
+                }
+            );
+        }
+        
         // Сохранение тренировки
         function saveWorkout() {
-            if (totalDistance === 0) {
-                tg.showAlert('Нет данных для сохранения. Начните тренировку.');
-                return;
-            }
-            
             const weight = parseFloat(weightInput.value) || 70;
             const workout = {
                 id: Date.now(),
@@ -764,10 +755,24 @@
             workouts.unshift(workout);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
             
-            tg.showAlert(`Тренировка сохранена!\n\n📏 ${totalDistance.toFixed(2)} км\n⏱️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал`);
+            tg.showAlert(`✅ Тренировка сохранена!\n\n📏 ${totalDistance.toFixed(2)} км\n⏱️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал`);
             tg.HapticFeedback.notificationOccurred('success');
             
-            saveBtn.disabled = true;
+            // Сброс после сохранения
+            resetTracking();
+        }
+        
+        // Подтверждение сброса
+        function confirmResetTracking() {
+            tg.showConfirm(
+                'Сбросить текущую тренировку?\n\nВсе данные будут потеряны!',
+                (confirmed) => {
+                    if (confirmed) {
+                        resetTracking();
+                        tg.HapticFeedback.notificationOccurred('warning');
+                    }
+                }
+            );
         }
         
         // Сброс
@@ -794,6 +799,7 @@
             startBtn.disabled = false;
             pauseBtn.disabled = true;
             saveBtn.disabled = true;
+            resetBtn.disabled = true;
             pauseBtn.textContent = 'Пауза';
             statusEl.textContent = 'GPS неактивен';
             statusEl.classList.remove('active');
@@ -835,7 +841,7 @@
                         <div class="workout-stats">
                             <span>📏 ${workout.distance.toFixed(2)} км</span>
                             <span>⏱️ ${durationHours}ч ${durationMinutes}м</span>
-                            <span>⚡ ${workout.avgSpeed} км/ч</span>
+                            <span> ${workout.avgSpeed} км/ч</span>
                             <span>🔥 ${workout.calories} ккал</span>
                             <span>🏔️ ${Math.round(workout.elevation)} м</span>
                             <span>🚀 ${workout.maxSpeed} км/ч</span>
@@ -850,23 +856,18 @@
         
         function deleteWorkout(id) {
             workoutToDelete = id;
-            document.getElementById('modalText').textContent = 'Вы действительно хотите удалить эту тренировку?';
-            document.getElementById('confirmModal').classList.add('active');
-        }
-        
-        function closeModal() {
-            document.getElementById('confirmModal').classList.remove('active');
-            workoutToDelete = null;
-        }
-        
-        function confirmAction() {
-            if (workoutToDelete !== null) {
-                workouts = workouts.filter(w => w.id !== workoutToDelete);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-                renderWorkoutList();
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-            closeModal();
+            tg.showConfirm(
+                'Вы действительно хотите удалить эту тренировку?',
+                (confirmed) => {
+                    if (confirmed) {
+                        workouts = workouts.filter(w => w.id !== workoutToDelete);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+                        renderWorkoutList();
+                        tg.HapticFeedback.notificationOccurred('success');
+                        workoutToDelete = null;
+                    }
+                }
+            );
         }
         
         // Отрисовка статистики
@@ -881,14 +882,13 @@
             document.getElementById('totalTime').textContent = (totalTime / 3600000).toFixed(1);
             document.getElementById('totalCalories').textContent = totalCalories;
             
-            // Рекорды
             if (workouts.length === 0) {
                 recordsListEl.innerHTML = '<div class="empty-state"><div>Нет данных для отображения рекордов</div></div>';
                 return;
             }
             
             const maxDistance = workouts.reduce((max, w) => w.distance > max.distance ? w : max, workouts[0]);
-            const maxSpeed = workouts.reduce((max, w) => parseFloat(w.maxSpeed) > parseFloat(max.maxSpeed) ? w : max, workouts[0]);
+            const maxSpeedWorkout = workouts.reduce((max, w) => parseFloat(w.maxSpeed) > parseFloat(max.maxSpeed) ? w : max, workouts[0]);
             const maxCalories = workouts.reduce((max, w) => w.calories > max.calories ? w : max, workouts[0]);
             
             recordsListEl.innerHTML = `
@@ -900,16 +900,16 @@
                     </div>
                 </div>
                 <div class="workout-item">
-                    <div class="workout-date">🚀 Максимальная скорость</div>
+                    <div class="workout-date"> Максимальная скорость</div>
                     <div class="workout-stats">
-                        <span>⚡ ${maxSpeed.maxSpeed} км/ч</span>
-                        <span>${new Date(maxSpeed.date).toLocaleDateString('ru-RU')}</span>
+                        <span> ${maxSpeedWorkout.maxSpeed} км/ч</span>
+                        <span>${new Date(maxSpeedWorkout.date).toLocaleDateString('ru-RU')}</span>
                     </div>
                 </div>
                 <div class="workout-item">
                     <div class="workout-date">🔥 Больше всего калорий</div>
                     <div class="workout-stats">
-                        <span>🔥 ${maxCalories.calories} ккал</span>
+                        <span> ${maxCalories.calories} ккал</span>
                         <span>${new Date(maxCalories.date).toLocaleDateString('ru-RU')}</span>
                     </div>
                 </div>
@@ -954,16 +954,10 @@
             tg.HapticFeedback.notificationOccurred('error');
         }
         
-        // Обработка кнопки назад
+        // Инициализация кнопки назад
         if (tg.BackButton) {
             tg.BackButton.onClick(() => {
-                const activeTab = document.querySelector('.tab.active');
-                if (activeTab && activeTab.textContent !== 'Тренировка') {
-                    switchTab('workout');
-                    document.querySelectorAll('.tab')[0].classList.add('active');
-                    document.querySelectorAll('.tab')[1].classList.remove('active');
-                    document.querySelectorAll('.tab')[2].classList.remove('active');
-                } else if (isTracking) {
+                if (isTracking) {
                     tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
                         if (confirmed) {
                             resetTracking();
