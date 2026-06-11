@@ -19,11 +19,50 @@
             color: var(--tg-theme-text-color, #ffffff);
             padding: 16px;
             min-height: 100vh;
+            padding-bottom: 80px;
         }
         
         .container {
             max-width: 400px;
             margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            border-radius: 12px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--tg-theme-button-color, #4CAF50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-id {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
         }
         
         h1 {
@@ -107,6 +146,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
+            margin-bottom: 20px;
         }
         
         button {
@@ -133,6 +173,11 @@
             color: white;
         }
         
+        #saveBtn {
+            background: #2196F3;
+            color: white;
+        }
+        
         #resetBtn {
             background: #f44336;
             color: white;
@@ -141,6 +186,94 @@
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 4px;
+            border-radius: 12px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: var(--tg-theme-text-color, #ffffff);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: var(--tg-theme-button-color, #4CAF50);
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .workout-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .workout-item {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .workout-date {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .workout-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #888);
+        }
+        
+        .workout-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color, #888);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
         
         .info {
@@ -152,52 +285,243 @@
             color: var(--tg-theme-hint-color, #888);
             text-align: center;
         }
+        
+        .total-stats {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .total-stats h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .total-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .total-stat {
+            text-align: center;
+        }
+        
+        .total-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #4CAF50);
+        }
+        
+        .total-stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--tg-theme-bg-color, #1a1a2e);
+            padding: 24px;
+            border-radius: 16px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .modal-text {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #888);
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+        }
+        
+        .elevation-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888);
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div class="user-name" id="userName">Пользователь</div>
+                    <div class="user-id" id="userId">ID: ---</div>
+                </div>
+            </div>
+        </div>
+        
         <h1>🚴 Вело Тренировка</h1>
-        <p class="subtitle">Bike Tracker</p>
+        <p class="subtitle">Bike Tracker Pro</p>
         
-        <div class="status" id="status">
-            GPS неактивен
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Пройденное расстояние</div>
-                <div class="stat-value" id="distance">0.00 км</div>
+        <!-- Экран тренировки -->
+        <div id="workoutScreen" class="screen active">
+            <div class="status" id="status">
+                GPS неактивен
             </div>
             
-            <div class="stat-card">
-                <div class="stat-label">Текущая скорость</div>
-                <div class="stat-value" id="speed">0.0 км/ч</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Пройденное расстояние</div>
+                    <div class="stat-value" id="distance">0.00 км</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Текущая скорость</div>
+                    <div class="stat-value" id="speed">0.0 км/ч</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Максимальная скорость</div>
+                    <div class="stat-value" id="maxSpeed">0.0 км/ч</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Время тренировки</div>
+                    <div class="stat-value" id="time">00:00</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Средняя скорость</div>
+                    <div class="stat-value" id="avgSpeed">0.0 км/ч</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Набор высоты</div>
+                    <div class="stat-value" id="elevation">0 м</div>
+                </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-label">Максимальная скорость</div>
-                <div class="stat-value" id="maxSpeed">0.0 км/ч</div>
+            <div class="weight-input">
+                <label>Вес (кг) для подсчета калорий</label>
+                <input type="number" id="weight" placeholder="70" value="70" min="30" max="200">
+            </div>
+            
+            <div class="stat-card" style="margin-bottom: 20px;">
+                <div class="stat-label">Сожженные калории</div>
+                <div class="stat-value" id="calories">0 ккал</div>
+            </div>
+            
+            <div class="buttons">
+                <button id="startBtn">Старт</button>
+                <button id="pauseBtn" disabled>Пауза</button>
+                <button id="saveBtn" disabled>Сохранить</button>
+            </div>
+            
+            <div class="buttons">
+                <button id="resetBtn" style="grid-column: 1 / -1;">Сбросить</button>
+            </div>
+            
+            <div class="info">
+                Для точного подсчета откройте страницу на смартфоне и разрешите доступ к геолокации.
             </div>
         </div>
         
-        <div class="weight-input">
-            <label>Вес (кг)</label>
-            <input type="number" id="weight" placeholder="70" value="70" min="30" max="200">
+        <!-- Экран истории -->
+        <div id="historyScreen" class="screen">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('workout')">Тренировка</button>
+                <button class="tab" onclick="switchTab('history')">История</button>
+                <button class="tab" onclick="switchTab('stats')">Статистика</button>
+            </div>
+            
+            <h3 style="margin-bottom: 16px;">История тренировок</h3>
+            <div id="workoutList" class="workout-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div>Пока нет сохраненных тренировок</div>
+                </div>
+            </div>
         </div>
         
-        <div class="stat-card" style="margin-bottom: 20px;">
-            <div class="stat-label">Сожженные калории</div>
-            <div class="stat-value" id="calories">0 ккал</div>
+        <!-- Экран статистики -->
+        <div id="statsScreen" class="screen">
+            <div class="tabs">
+                <button class="tab" onclick="switchTab('workout')">Тренировка</button>
+                <button class="tab" onclick="switchTab('history')">История</button>
+                <button class="tab active" onclick="switchTab('stats')">Статистика</button>
+            </div>
+            
+            <div class="total-stats">
+                <h3>📊 Общая статистика</h3>
+                <div class="total-stats-grid">
+                    <div class="total-stat">
+                        <div class="total-stat-value" id="totalWorkouts">0</div>
+                        <div class="total-stat-label">Тренировок</div>
+                    </div>
+                    <div class="total-stat">
+                        <div class="total-stat-value" id="totalDistance">0</div>
+                        <div class="total-stat-label">Всего км</div>
+                    </div>
+                    <div class="total-stat">
+                        <div class="total-stat-value" id="totalTime">0</div>
+                        <div class="total-stat-label">Часов</div>
+                    </div>
+                    <div class="total-stat">
+                        <div class="total-stat-value" id="totalCalories">0</div>
+                        <div class="total-stat-label">Ккал сожжено</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="total-stats">
+                <h3>🏆 Рекорды</h3>
+                <div class="workout-list" id="recordsList">
+                    <div class="empty-state">
+                        <div>Нет данных для отображения рекордов</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="buttons">
-            <button id="startBtn">Старт</button>
-            <button id="pauseBtn" disabled>Пауза</button>
-            <button id="resetBtn">Сброс</button>
-        </div>
-        
-        <div class="info">
-            Для точного подсчета разрешите доступ к геолокации
+    </div>
+    
+    <!-- Модальное окно подтверждения -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Подтверждение</div>
+            <div class="modal-text" id="modalText">Вы уверены?</div>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" style="background: var(--tg-theme-hint-color, #888);">Отмена</button>
+                <button onclick="confirmAction()" id="confirmBtn" style="background: #f44336;">Удалить</button>
+            </div>
         </div>
     </div>
 
@@ -207,10 +531,28 @@
         tg.expand();
         tg.ready();
         
+        // Получение данных пользователя
+        const user = tg.initDataUnsafe.user || {};
+        const userId = user.id || 'unknown';
+        const userName = user.first_name ? 
+            `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}` : 
+            'Пользователь';
+        const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        // Отображение данных пользователя
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userId').textContent = `ID: ${userId}`;
+        document.getElementById('userAvatar').textContent = userInitials;
+        
         // Установка цветов под тему Telegram
         document.documentElement.style.setProperty('--tg-theme-bg-color', tg.backgroundColor || '#1a1a2e');
         document.documentElement.style.setProperty('--tg-theme-text-color', tg.textColor || '#ffffff');
         
+        // Хранилище данных
+        const STORAGE_KEY = `bikeTracker_${userId}`;
+        let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        
+        // Переменные тренировки
         let watchId = null;
         let isTracking = false;
         let isPaused = false;
@@ -218,21 +560,53 @@
         let maxSpeed = 0;
         let lastPosition = null;
         let startTime = null;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let totalElevation = 0;
+        let lastElevation = null;
         
+        // Элементы DOM
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
+        const saveBtn = document.getElementById('saveBtn');
         const resetBtn = document.getElementById('resetBtn');
         const statusEl = document.getElementById('status');
         const distanceEl = document.getElementById('distance');
         const speedEl = document.getElementById('speed');
         const maxSpeedEl = document.getElementById('maxSpeed');
+        const timeEl = document.getElementById('time');
+        const avgSpeedEl = document.getElementById('avgSpeed');
+        const elevationEl = document.getElementById('elevation');
         const caloriesEl = document.getElementById('calories');
         const weightInput = document.getElementById('weight');
+        const workoutListEl = document.getElementById('workoutList');
+        const recordsListEl = document.getElementById('recordsList');
         
+        // Обработчики событий
         startBtn.addEventListener('click', startTracking);
         pauseBtn.addEventListener('click', togglePause);
+        saveBtn.addEventListener('click', saveWorkout);
         resetBtn.addEventListener('click', resetTracking);
         
+        // Функции переключения экранов
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            if (tab === 'workout') {
+                document.getElementById('workoutScreen').classList.add('active');
+            } else if (tab === 'history') {
+                document.getElementById('historyScreen').classList.add('active');
+                renderWorkoutList();
+            } else if (tab === 'stats') {
+                document.getElementById('statsScreen').classList.add('active');
+                renderStats();
+            }
+        }
+        
+        // Начало отслеживания
         function startTracking() {
             if (!navigator.geolocation) {
                 tg.showAlert('Геолокация не поддерживается вашим устройством');
@@ -255,8 +629,11 @@
             isPaused = false;
             startTime = Date.now();
             
+            startTimer();
+            
             startBtn.disabled = true;
             pauseBtn.disabled = false;
+            saveBtn.disabled = true;
             pauseBtn.textContent = 'Пауза';
             statusEl.textContent = 'GPS активен - отслеживание';
             statusEl.classList.add('active');
@@ -265,12 +642,14 @@
             tg.HapticFeedback.notificationOccurred('success');
         }
         
+        // Обработка позиции
         function handlePosition(position) {
             if (isPaused) return;
             
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             const speed = position.coords.speed; // м/с
+            const altitude = position.coords.altitude;
             const timestamp = position.timestamp;
             
             if (lastPosition) {
@@ -285,9 +664,18 @@
                 if (distance < 0.5 && distance > 0) {
                     totalDistance += distance;
                 }
+                
+                // Подсчет набора высоты
+                if (altitude !== null && lastElevation !== null) {
+                    const elevationGain = altitude - lastElevation;
+                    if (elevationGain > 0) {
+                        totalElevation += elevationGain;
+                    }
+                }
             }
             
             lastPosition = { lat, lon, timestamp };
+            lastElevation = altitude;
             
             const speedKmh = speed ? (speed * 3.6).toFixed(1) : 0;
             
@@ -297,11 +685,252 @@
             
             const weight = parseFloat(weightInput.value) || 70;
             const calories = calculateCalories(totalDistance, weight);
+            const avgSpeed = calculateAvgSpeed();
             
             distanceEl.textContent = totalDistance.toFixed(2) + ' км';
             speedEl.textContent = speedKmh + ' км/ч';
             maxSpeedEl.textContent = maxSpeed + ' км/ч';
+            elevationEl.textContent = Math.round(totalElevation) + ' м';
             caloriesEl.textContent = calories + ' ккал';
+            avgSpeedEl.textContent = avgSpeed + ' км/ч';
+        }
+        
+        // Расчет средней скорости
+        function calculateAvgSpeed() {
+            if (elapsedTime === 0 || totalDistance === 0) return 0;
+            const hours = elapsedTime / 3600000;
+            return (totalDistance / hours).toFixed(1);
+        }
+        
+        // Таймер
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    elapsedTime = Date.now() - startTime;
+                    updateTimeDisplay();
+                }
+            }, 1000);
+        }
+        
+        // Обновление отображения времени
+        function updateTimeDisplay() {
+            const totalSeconds = Math.floor(elapsedTime / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            timeEl.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Пауза
+        function togglePause() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                pauseBtn.textContent = 'Продолжить';
+                statusEl.textContent = 'На паузе';
+                statusEl.classList.remove('active');
+                startTime = Date.now() - elapsedTime;
+            } else {
+                pauseBtn.textContent = 'Пауза';
+                statusEl.textContent = 'GPS активен - отслеживание';
+                statusEl.classList.add('active');
+            }
+            
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Сохранение тренировки
+        function saveWorkout() {
+            if (totalDistance === 0) {
+                tg.showAlert('Нет данных для сохранения. Начните тренировку.');
+                return;
+            }
+            
+            const weight = parseFloat(weightInput.value) || 70;
+            const workout = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                distance: totalDistance,
+                maxSpeed: maxSpeed,
+                avgSpeed: calculateAvgSpeed(),
+                duration: elapsedTime,
+                calories: calculateCalories(totalDistance, weight),
+                elevation: totalElevation,
+                weight: weight
+            };
+            
+            workouts.unshift(workout);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+            
+            tg.showAlert(`Тренировка сохранена!\n\n📏 ${totalDistance.toFixed(2)} км\n⏱️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал`);
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            saveBtn.disabled = true;
+        }
+        
+        // Сброс
+        function resetTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            isTracking = false;
+            isPaused = false;
+            totalDistance = 0;
+            maxSpeed = 0;
+            totalElevation = 0;
+            lastPosition = null;
+            lastElevation = null;
+            elapsedTime = 0;
+            startTime = null;
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            saveBtn.disabled = true;
+            pauseBtn.textContent = 'Пауза';
+            statusEl.textContent = 'GPS неактивен';
+            statusEl.classList.remove('active');
+            
+            distanceEl.textContent = '0.00 км';
+            speedEl.textContent = '0.0 км/ч';
+            maxSpeedEl.textContent = '0.0 км/ч';
+            timeEl.textContent = '00:00:00';
+            avgSpeedEl.textContent = '0.0 км/ч';
+            elevationEl.textContent = '0 м';
+            caloriesEl.textContent = '0 ккал';
+            
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
+        // Отрисовка списка тренировок
+        function renderWorkoutList() {
+            if (workouts.length === 0) {
+                workoutListEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div>Пока нет сохраненных тренировок</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            workoutListEl.innerHTML = workouts.map(workout => {
+                const date = new Date(workout.date);
+                const dateStr = date.toLocaleDateString('ru-RU');
+                const timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                const durationHours = Math.floor(workout.duration / 3600000);
+                const durationMinutes = Math.floor((workout.duration % 3600000) / 60000);
+                
+                return `
+                    <div class="workout-item">
+                        <button class="delete-btn" onclick="deleteWorkout(${workout.id})">Удалить</button>
+                        <div class="workout-date">${dateStr} ${timeStr}</div>
+                        <div class="workout-stats">
+                            <span>📏 ${workout.distance.toFixed(2)} км</span>
+                            <span>⏱️ ${durationHours}ч ${durationMinutes}м</span>
+                            <span>⚡ ${workout.avgSpeed} км/ч</span>
+                            <span>🔥 ${workout.calories} ккал</span>
+                            <span>🏔️ ${Math.round(workout.elevation)} м</span>
+                            <span>🚀 ${workout.maxSpeed} км/ч</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Удаление тренировки
+        let workoutToDelete = null;
+        
+        function deleteWorkout(id) {
+            workoutToDelete = id;
+            document.getElementById('modalText').textContent = 'Вы действительно хотите удалить эту тренировку?';
+            document.getElementById('confirmModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            workoutToDelete = null;
+        }
+        
+        function confirmAction() {
+            if (workoutToDelete !== null) {
+                workouts = workouts.filter(w => w.id !== workoutToDelete);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+                renderWorkoutList();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            closeModal();
+        }
+        
+        // Отрисовка статистики
+        function renderStats() {
+            const totalWorkouts = workouts.length;
+            const totalDistance = workouts.reduce((sum, w) => sum + w.distance, 0);
+            const totalTime = workouts.reduce((sum, w) => sum + w.duration, 0);
+            const totalCalories = workouts.reduce((sum, w) => sum + w.calories, 0);
+            
+            document.getElementById('totalWorkouts').textContent = totalWorkouts;
+            document.getElementById('totalDistance').textContent = totalDistance.toFixed(1);
+            document.getElementById('totalTime').textContent = (totalTime / 3600000).toFixed(1);
+            document.getElementById('totalCalories').textContent = totalCalories;
+            
+            // Рекорды
+            if (workouts.length === 0) {
+                recordsListEl.innerHTML = '<div class="empty-state"><div>Нет данных для отображения рекордов</div></div>';
+                return;
+            }
+            
+            const maxDistance = workouts.reduce((max, w) => w.distance > max.distance ? w : max, workouts[0]);
+            const maxSpeed = workouts.reduce((max, w) => parseFloat(w.maxSpeed) > parseFloat(max.maxSpeed) ? w : max, workouts[0]);
+            const maxCalories = workouts.reduce((max, w) => w.calories > max.calories ? w : max, workouts[0]);
+            
+            recordsListEl.innerHTML = `
+                <div class="workout-item">
+                    <div class="workout-date">🏆 Самая длинная</div>
+                    <div class="workout-stats">
+                        <span>📏 ${maxDistance.distance.toFixed(2)} км</span>
+                        <span>${new Date(maxDistance.date).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                </div>
+                <div class="workout-item">
+                    <div class="workout-date">🚀 Максимальная скорость</div>
+                    <div class="workout-stats">
+                        <span>⚡ ${maxSpeed.maxSpeed} км/ч</span>
+                        <span>${new Date(maxSpeed.date).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                </div>
+                <div class="workout-item">
+                    <div class="workout-date">🔥 Больше всего калорий</div>
+                    <div class="workout-stats">
+                        <span>🔥 ${maxCalories.calories} ккал</span>
+                        <span>${new Date(maxCalories.date).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Вспомогательные функции
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function calculateCalories(distanceKm, weightKg) {
+            return Math.round(distanceKm * weightKg * 0.5);
         }
         
         function handleError(error) {
@@ -325,70 +954,16 @@
             tg.HapticFeedback.notificationOccurred('error');
         }
         
-        function togglePause() {
-            isPaused = !isPaused;
-            
-            if (isPaused) {
-                pauseBtn.textContent = 'Продолжить';
-                statusEl.textContent = 'На паузе';
-                statusEl.classList.remove('active');
-            } else {
-                pauseBtn.textContent = 'Пауза';
-                statusEl.textContent = 'GPS активен - отслеживание';
-                statusEl.classList.add('active');
-            }
-            
-            tg.HapticFeedback.impactOccurred('light');
-        }
-        
-        function resetTracking() {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-            
-            isTracking = false;
-            isPaused = false;
-            totalDistance = 0;
-            maxSpeed = 0;
-            lastPosition = null;
-            startTime = null;
-            
-            startBtn.disabled = false;
-            pauseBtn.disabled = true;
-            pauseBtn.textContent = 'Пауза';
-            statusEl.textContent = 'GPS неактивен';
-            statusEl.classList.remove('active');
-            
-            distanceEl.textContent = '0.00 км';
-            speedEl.textContent = '0.0 км/ч';
-            maxSpeedEl.textContent = '0.0 км/ч';
-            caloriesEl.textContent = '0 ккал';
-            
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-        
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Радиус Земли в км
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-        
-        function calculateCalories(distanceKm, weightKg) {
-            // Приблизительно 0.5 ккал на кг веса на км для велосипеда
-            return Math.round(distanceKm * weightKg * 0.5);
-        }
-        
-        // Закрытие приложения по кнопке (опционально)
+        // Обработка кнопки назад
         if (tg.BackButton) {
             tg.BackButton.onClick(() => {
-                if (isTracking) {
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab && activeTab.textContent !== 'Тренировка') {
+                    switchTab('workout');
+                    document.querySelectorAll('.tab')[0].classList.add('active');
+                    document.querySelectorAll('.tab')[1].classList.remove('active');
+                    document.querySelectorAll('.tab')[2].classList.remove('active');
+                } else if (isTracking) {
                     tg.showConfirm('Тренировка активна. Завершить?', (confirmed) => {
                         if (confirmed) {
                             resetTracking();
