@@ -117,6 +117,169 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
+        /* ===== БЛОК ПОГОДЫ ===== */
+        .weather-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .weather-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .weather-card.loading {
+            background: linear-gradient(135deg, #757f9a 0%, #d7dde8 100%);
+        }
+        
+        .weather-card.bad-weather {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+        }
+        
+        .weather-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .weather-location {
+            font-size: 13px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .weather-refresh {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+        
+        .weather-refresh:active {
+            transform: scale(0.9);
+        }
+        
+        .weather-refresh.spinning {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .weather-temp-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .weather-icon {
+            font-size: 56px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .weather-temp {
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .weather-temp sup {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+        
+        .weather-description {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 4px;
+            text-transform: capitalize;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .weather-detail {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .weather-detail-label {
+            font-size: 10px;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+        
+        .weather-detail-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .weather-warning {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .weather-loading-text {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -199,24 +362,6 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
         
-        /* Погода */
-        .weather-card {
-            background: linear-gradient(135deg, rgba(79,172,254,0.35) 0%, rgba(0,242,254,0.35) 100%);
-            backdrop-filter: blur(10px); padding: 16px; border-radius: 16px;
-            margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: flex; align-items: center; gap: 14px;
-        }
-
-        .weather-icon { font-size: 36px; flex-shrink: 0; }
-        .weather-info { flex: 1; }
-        .weather-temp { font-size: 28px; font-weight: bold; }
-        .weather-desc { font-size: 13px; opacity: 0.9; margin-top: 2px; }
-        .weather-details { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-        .weather-refresh-btn {
-            background: rgba(255,255,255,0.2); border: none; color: white;
-            width: 34px; height: 34px; border-radius: 10px; font-size: 16px; cursor: pointer;
-        }
         .calories-card {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             padding: 20px;
@@ -474,6 +619,17 @@
             opacity: 0.9;
         }
         
+        .workout-weather {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -708,6 +864,14 @@
             .goal-type-btn {
                 width: 100%;
             }
+            
+            .weather-icon {
+                font-size: 44px;
+            }
+            
+            .weather-temp {
+                font-size: 38px;
+            }
         }
         
         @media (min-width: 768px) {
@@ -744,19 +908,55 @@
                 GPS неактивен
             </div>
             
+            <!-- БЛОК ПОГОДЫ -->
+            <div class="weather-card loading" id="weatherCard">
+                <div class="weather-header">
+                    <div class="weather-location" id="weatherLocation">
+                        <span>📍</span>
+                        <span id="weatherLocationText">Определение местоположения...</span>
+                    </div>
+                    <button class="weather-refresh" id="weatherRefreshBtn" onclick="refreshWeather()" title="Обновить погоду">🔄</button>
+                </div>
+                <div class="weather-loading-text" id="weatherLoading">
+                    ⏳ Загрузка погоды...
+                </div>
+                <div id="weatherContent" style="display: none;">
+                    <div class="weather-main">
+                        <div class="weather-temp-block">
+                            <div class="weather-icon" id="weatherIcon">☀️</div>
+                            <div>
+                                <div class="weather-temp">
+                                    <span id="weatherTemp">--</span><sup>°C</sup>
+                                </div>
+                                <div class="weather-description" id="weatherDescription">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">Ощущается</div>
+                            <div class="weather-detail-value"><span id="weatherFeelsLike">--</span>°</div>
+                        </div>
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">Влажность</div>
+                            <div class="weather-detail-value"><span id="weatherHumidity">--</span>%</div>
+                        </div>
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">Ветер</div>
+                            <div class="weather-detail-value"><span id="weatherWind">--</span> м/с</div>
+                        </div>
+                    </div>
+                    <div class="weather-warning" id="weatherWarning" style="display: none;">
+                        <span>⚠️</span>
+                        <span id="weatherWarningText"></span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="map-container" id="mapContainer">
                 <div id="map"></div>
             </div>
-              <!-- Погода -->
-        <div class="weather-card" id="weatherCard" style="display:none">
-            <div class="weather-icon" id="weatherIcon">🌤️</div>
-            <div class="weather-info">
-                <div class="weather-temp" id="weatherTemp">--°C</div>
-                <div class="weather-desc" id="weatherDesc">Загрузка...</div>
-                <div class="weather-details" id="weatherDetails"></div>
-            </div>
-            <button class="weather-refresh-btn" onclick="loadWeather()" title="Обновить">🔄</button>
-        </div>
+            
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-label">📍 Расстояние</div>
@@ -764,7 +964,7 @@
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-label"> Скорость</div>
+                    <div class="stat-label">⚡ Скорость</div>
                     <div class="stat-value"><span id="speed">0.0</span><span class="stat-unit">км/ч</span></div>
                 </div>
                 
@@ -790,7 +990,7 @@
             </div>
             
             <div class="section">
-                <div class="section-title">️ Вес (кг) для подсчета калорий</div>
+                <div class="section-title">⚖️ Вес (кг) для подсчета калорий</div>
                 <input type="number" class="weight-input" id="weight" placeholder="70" value="70" min="30" max="200">
             </div>
             
@@ -825,7 +1025,7 @@
                 <button class="btn btn-start" id="startBtn">▶️ Старт</button>
                 <button class="btn btn-pause" id="pauseBtn" disabled>⏸️ Пауза</button>
                 <button class="btn btn-save" id="saveBtn" disabled>💾 Сохранить</button>
-                <button class="btn btn-reset" id="resetBtn" disabled>️ Сброс</button>
+                <button class="btn btn-reset" id="resetBtn" disabled>🗑️ Сброс</button>
                 <button class="btn btn-history" onclick="showHistory()">📋 История тренировок</button>
             </div>
             
@@ -886,7 +1086,7 @@
             <div class="settings-list">
                 <div class="setting-item">
                     <div class="setting-info">
-                        <div class="setting-title"> Доступ к геолокации</div>
+                        <div class="setting-title">📍 Доступ к геолокации</div>
                         <div class="setting-desc" id="locationPermText">Разрешено</div>
                     </div>
                     <div class="toggle active" id="locationToggle" onclick="toggleLocationPermission()">
@@ -896,7 +1096,27 @@
                 
                 <div class="setting-item">
                     <div class="setting-info">
-                        <div class="setting-title"> Не выключать экран</div>
+                        <div class="setting-title">🌤️ Автообновление погоды</div>
+                        <div class="setting-desc">Обновлять погоду каждые 15 минут</div>
+                    </div>
+                    <div class="toggle active" id="weatherAutoUpdateToggle" onclick="toggleSetting('weatherAutoUpdate')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">⚠️ Предупреждения о погоде</div>
+                        <div class="setting-desc">Уведомлять о плохой погоде</div>
+                    </div>
+                    <div class="toggle active" id="weatherWarningsToggle" onclick="toggleSetting('weatherWarnings')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-title">🌙 Не выключать экран</div>
                         <div class="setting-desc">Предотвращать блокировку во время тренировки</div>
                     </div>
                     <div class="toggle active" id="wakeLockToggle" onclick="toggleSetting('wakeLock')">
@@ -918,7 +1138,7 @@
     <!-- Модальное окно для карты маршрута -->
     <div id="mapModal" class="map-modal">
         <div class="map-modal-header">
-            <div class="map-modal-title">️ Маршрут тренировки</div>
+            <div class="map-modal-title">🗺️ Маршрут тренировки</div>
             <button class="map-modal-close" onclick="closeMapModal()">✕</button>
         </div>
         <div id="routeMap"></div>
@@ -947,11 +1167,14 @@
         const SETTINGS_KEY = `bikeTracker_settings_${userId}`;
         const PERMISSION_KEY = `bikeTracker_locationPermission_${userId}`;
         const GPS_STATE_KEY = `bikeTracker_gpsState_${userId}`;
+        const WEATHER_CACHE_KEY = `bikeTracker_weather_${userId}`;
         
         // Загрузка настроек
         let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || JSON.stringify({
             locationPermission: true,
-            wakeLock: true
+            wakeLock: true,
+            weatherAutoUpdate: true,
+            weatherWarnings: true
         }));
         
         // Загрузка разрешения на геолокацию
@@ -979,7 +1202,13 @@
         let goalValue = 10;
         let goalAchieved = false;
         let wakeLock = null;
-        let gpsAlreadyRequested = false; // Флаг, что GPS уже запрашивался
+        let gpsAlreadyRequested = false;
+        
+        // Переменные погоды
+        let currentWeather = null;
+        let weatherUpdateInterval = null;
+        let lastWeatherCoords = null;
+        let weatherFetchedForWorkout = false;
         
         // Элементы
         const startBtn = document.getElementById('startBtn');
@@ -1013,6 +1242,242 @@
             updateGoalDisplay();
         });
         
+        // ===== ПОГОДА: Open-Meteo API (бесплатный, без ключа) =====
+        
+        // Расшифровка weather code Open-Meteo
+        function getWeatherInfo(code) {
+            const weatherMap = {
+                0: { icon: '☀️', desc: 'Ясно', good: true },
+                1: { icon: '🌤️', desc: 'Преимущественно ясно', good: true },
+                2: { icon: '⛅', desc: 'Переменная облачность', good: true },
+                3: { icon: '☁️', desc: 'Пасмурно', good: true },
+                45: { icon: '🌫️', desc: 'Туман', good: false },
+                48: { icon: '🌫️', desc: 'Изморозь', good: false },
+                51: { icon: '🌦️', desc: 'Лёгкая морось', good: false },
+                53: { icon: '🌦️', desc: 'Морось', good: false },
+                55: { icon: '🌧️', desc: 'Сильная морось', good: false },
+                56: { icon: '🌧️', desc: 'Ледяная морось', good: false },
+                57: { icon: '🌧️', desc: 'Сильная ледяная морось', good: false },
+                61: { icon: '🌧️', desc: 'Небольшой дождь', good: false },
+                63: { icon: '🌧️', desc: 'Дождь', good: false },
+                65: { icon: '🌧️', desc: 'Сильный дождь', good: false },
+                66: { icon: '🌧️', desc: 'Ледяной дождь', good: false },
+                67: { icon: '🌧️', desc: 'Сильный ледяной дождь', good: false },
+                71: { icon: '🌨️', desc: 'Небольшой снег', good: false },
+                73: { icon: '🌨️', desc: 'Снег', good: false },
+                75: { icon: '❄️', desc: 'Сильный снег', good: false },
+                77: { icon: '❄️', desc: 'Снежные зёрна', good: false },
+                80: { icon: '🌦️', desc: 'Ливень', good: false },
+                81: { icon: '🌧️', desc: 'Сильный ливень', good: false },
+                82: { icon: '⛈️', desc: 'Очень сильный ливень', good: false },
+                85: { icon: '🌨️', desc: 'Снегопад', good: false },
+                86: { icon: '❄️', desc: 'Сильный снегопад', good: false },
+                95: { icon: '⛈️', desc: 'Гроза', good: false },
+                96: { icon: '⛈️', desc: 'Гроза с градом', good: false },
+                99: { icon: '⛈️', desc: 'Сильная гроза с градом', good: false }
+            };
+            return weatherMap[code] || { icon: '🌡️', desc: 'Неизвестно', good: true };
+        }
+        
+        // Получение погоды через Open-Meteo API
+        async function fetchWeather(lat, lon) {
+            const weatherCard = document.getElementById('weatherCard');
+            const weatherLoading = document.getElementById('weatherLoading');
+            const weatherContent = document.getElementById('weatherContent');
+            const refreshBtn = document.getElementById('weatherRefreshBtn');
+            
+            weatherCard.classList.add('loading');
+            weatherLoading.style.display = 'block';
+            weatherContent.style.display = 'none';
+            refreshBtn.classList.add('spinning');
+            
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,pressure_msl&timezone=auto`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка получения погоды');
+                
+                const data = await response.json();
+                const current = data.current;
+                
+                currentWeather = {
+                    temp: Math.round(current.temperature_2m),
+                    feelsLike: Math.round(current.apparent_temperature),
+                    humidity: current.relative_humidity_2m,
+                    windSpeed: (current.wind_speed_10m / 3.6).toFixed(1), // км/ч -> м/с
+                    weatherCode: current.weather_code,
+                    pressure: Math.round(current.pressure_msl),
+                    lat: lat,
+                    lon: lon,
+                    timestamp: Date.now()
+                };
+                
+                // Сохраняем в кэш
+                localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(currentWeather));
+                
+                updateWeatherUI();
+                
+                weatherCard.classList.remove('loading');
+                weatherLoading.style.display = 'none';
+                weatherContent.style.display = 'block';
+                
+                // Обновляем локацию
+                reverseGeocode(lat, lon);
+                
+                // Предупреждение о плохой погоде
+                checkWeatherWarning();
+                
+            } catch (err) {
+                console.error('Ошибка погоды:', err);
+                weatherLoading.textContent = '❌ Не удалось загрузить погоду';
+                
+                // Пробуем загрузить из кэша
+                const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+                if (cached) {
+                    try {
+                        currentWeather = JSON.parse(cached);
+                        updateWeatherUI();
+                        weatherLoading.style.display = 'none';
+                        weatherContent.style.display = 'block';
+                        weatherCard.classList.remove('loading');
+                    } catch (e) {}
+                }
+            } finally {
+                refreshBtn.classList.remove('spinning');
+            }
+        }
+        
+        // Обновление UI погоды
+        function updateWeatherUI() {
+            if (!currentWeather) return;
+            
+            const info = getWeatherInfo(currentWeather.weatherCode);
+            const weatherCard = document.getElementById('weatherCard');
+            
+            document.getElementById('weatherIcon').textContent = info.icon;
+            document.getElementById('weatherTemp').textContent = currentWeather.temp;
+            document.getElementById('weatherDescription').textContent = info.desc;
+            document.getElementById('weatherFeelsLike').textContent = currentWeather.feelsLike;
+            document.getElementById('weatherHumidity').textContent = currentWeather.humidity;
+            document.getElementById('weatherWind').textContent = currentWeather.windSpeed;
+            
+            // Меняем фон в зависимости от погоды
+            weatherCard.classList.remove('bad-weather');
+            if (!info.good) {
+                weatherCard.classList.add('bad-weather');
+            }
+        }
+        
+        // Обратное геокодирование (координаты -> название места)
+        async function reverseGeocode(lat, lon) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=ru`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let locationName = '';
+                if (data.address) {
+                    locationName = data.address.city || 
+                                  data.address.town || 
+                                  data.address.village ||
+                                  data.address.county ||
+                                  data.address.state || '';
+                }
+                
+                if (!locationName) {
+                    locationName = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+                }
+                
+                document.getElementById('weatherLocationText').textContent = locationName;
+            } catch (err) {
+                document.getElementById('weatherLocationText').textContent = 
+                    `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+            }
+        }
+        
+        // Проверка предупреждений о погоде
+        function checkWeatherWarning() {
+            if (!settings.weatherWarnings || !currentWeather) return;
+            
+            const warningEl = document.getElementById('weatherWarning');
+            const warningText = document.getElementById('weatherWarningText');
+            const info = getWeatherInfo(currentWeather.weatherCode);
+            
+            const warnings = [];
+            
+            if (!info.good) {
+                warnings.push(`Плохая погода: ${info.desc.toLowerCase()}`);
+            }
+            
+            if (currentWeather.temp < 0) {
+                warnings.push(`Мороз ${currentWeather.temp}°C - одевайтесь теплее`);
+            } else if (currentWeather.temp > 30) {
+                warnings.push(`Жара ${currentWeather.temp}°C - пейте больше воды`);
+            }
+            
+            const windSpeed = parseFloat(currentWeather.windSpeed);
+            if (windSpeed > 10) {
+                warnings.push(`Сильный ветер ${currentWeather.windSpeed} м/с`);
+            }
+            
+            if (currentWeather.feelsLike < -10) {
+                warnings.push(`Ощущается как ${currentWeather.feelsLike}°C - риск обморожения`);
+            }
+            
+            if (warnings.length > 0) {
+                warningText.textContent = warnings.join('. ');
+                warningEl.style.display = 'flex';
+            } else {
+                warningEl.style.display = 'none';
+            }
+        }
+        
+        // Обновление погоды вручную
+        function refreshWeather() {
+            if (lastWeatherCoords) {
+                fetchWeather(lastWeatherCoords.lat, lastWeatherCoords.lon);
+            } else if (lastPosition) {
+                fetchWeather(lastPosition.lat, lastPosition.lon);
+            } else {
+                // Запрашиваем текущую позицию для погоды
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        lastWeatherCoords = { lat, lon };
+                        fetchWeather(lat, lon);
+                    },
+                    (err) => {
+                        tg.showAlert('Не удалось получить местоположение для погоды');
+                    },
+                    { enableHighAccuracy: false, timeout: 10000 }
+                );
+            }
+        }
+        
+        // Запуск автообновления погоды
+        function startWeatherAutoUpdate() {
+            if (weatherUpdateInterval) {
+                clearInterval(weatherUpdateInterval);
+            }
+            
+            if (settings.weatherAutoUpdate) {
+                // Обновляем каждые 15 минут
+                weatherUpdateInterval = setInterval(() => {
+                    if (lastPosition && isTracking) {
+                        fetchWeather(lastPosition.lat, lastPosition.lon);
+                    }
+                }, 15 * 60 * 1000);
+            }
+        }
+        
+        function stopWeatherAutoUpdate() {
+            if (weatherUpdateInterval) {
+                clearInterval(weatherUpdateInterval);
+                weatherUpdateInterval = null;
+            }
+        }
+        
         // Сохранение настроек
         function saveSettings() {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -1029,6 +1494,22 @@
                     requestWakeLock();
                 } else {
                     releaseWakeLock();
+                }
+            }
+            
+            if (setting === 'weatherAutoUpdate') {
+                if (settings.weatherAutoUpdate) {
+                    startWeatherAutoUpdate();
+                } else {
+                    stopWeatherAutoUpdate();
+                }
+            }
+            
+            if (setting === 'weatherWarnings') {
+                if (!settings.weatherWarnings) {
+                    document.getElementById('weatherWarning').style.display = 'none';
+                } else {
+                    checkWeatherWarning();
                 }
             }
         }
@@ -1050,6 +1531,8 @@
             document.getElementById('locationToggle').classList.toggle('active', locationPermissionGranted);
             document.getElementById('locationPermText').textContent = locationPermissionGranted ? 'Разрешено' : 'Запрещено';
             document.getElementById('wakeLockToggle').classList.toggle('active', settings.wakeLock);
+            document.getElementById('weatherAutoUpdateToggle').classList.toggle('active', settings.weatherAutoUpdate);
+            document.getElementById('weatherWarningsToggle').classList.toggle('active', settings.weatherWarnings);
         }
         
         // Wake Lock API
@@ -1168,6 +1651,7 @@
                     currentGoalType: currentGoalType,
                     goalValue: goalValue,
                     weight: parseFloat(weightInput.value) || 70,
+                    weather: currentWeather,
                     timestamp: Date.now()
                 };
                 sessionStorage.setItem(GPS_STATE_KEY, JSON.stringify(state));
@@ -1175,43 +1659,7 @@
                 sessionStorage.removeItem(GPS_STATE_KEY);
             }
         }
-        //  ПОГОДА (Open-Meteo — бесплатный, без ключа)
-// ============================================================
-async function loadWeather() {
-    if (!navigator.geolocation) return;
-    const card = document.getElementById('weatherCard');
-    if (settings.weather) card.style.display = 'flex';
-    document.getElementById('weatherDesc').textContent = 'Загрузка...';
-
-    navigator.geolocation.getCurrentPosition(async pos => {
-        try {
-            const lat = pos.coords.latitude.toFixed(4);
-            const lon = pos.coords.longitude.toFixed(4);
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m&timezone=auto&forecast_days=1`;
-            const res  = await fetch(url);
-            const data = await res.json();
-            const cw   = data.current_weather;
-            const wmoMap = {
-                0:'☀️ Ясно',1:'🌤️ Преимущественно ясно',2:'⛅ Переменная облачность',3:'☁️ Облачно',
-                45:'🌫️ Туман',48:'🌫️ Иней',51:'🌦️ Лёгкая морось',53:'🌦️ Морось',55:'🌧️ Сильная морось',
-                61:'🌧️ Дождь',63:'🌧️ Умеренный дождь',65:'🌧️ Сильный дождь',
-                71:'❄️ Снег',73:'❄️ Умеренный снег',75:'❄️ Сильный снег',
-                80:'🌦️ Ливень',81:'🌧️ Умеренный ливень',82:'⛈️ Сильный ливень',
-                95:'⛈️ Гроза',96:'⛈️ Гроза с градом',99:'⛈️ Гроза с крупным градом'
-            };
-            const descRaw = wmoMap[cw.weathercode] || '🌡️ Данные получены';
-            const [icon, ...rest] = descRaw.split(' ');
-            document.getElementById('weatherIcon').textContent = icon;
-            document.getElementById('weatherTemp').textContent = `${Math.round(cw.temperature)}°C`;
-            document.getElementById('weatherDesc').textContent = rest.join(' ');
-            const wind = cw.windspeed;
-            document.getElementById('weatherDetails').textContent = `💨 Ветер: ${Math.round(wind)} км/ч`;
-            weatherLoaded = true;
-        } catch(e) {
-            document.getElementById('weatherDesc').textContent = 'Нет данных';
-        }
-    }, () => { document.getElementById('weatherDesc').textContent = 'Нет доступа к GPS'; }, { maximumAge: 60000, timeout: 8000 });
-}
+        
         // Восстановление состояния GPS
         function restoreGPSState() {
             const savedState = sessionStorage.getItem(GPS_STATE_KEY);
@@ -1220,7 +1668,6 @@ async function loadWeather() {
             try {
                 const state = JSON.parse(savedState);
                 
-                // Проверяем, что состояние не слишком старое (максимум 2 часа)
                 const age = Date.now() - state.timestamp;
                 if (age > 7200000) {
                     sessionStorage.removeItem(GPS_STATE_KEY);
@@ -1241,7 +1688,19 @@ async function loadWeather() {
                 currentGoalType = state.currentGoalType || 'distance';
                 goalValue = state.goalValue || 10;
                 
-                // Обновляем UI
+                // Восстановление погоды
+                if (state.weather) {
+                    currentWeather = state.weather;
+                    updateWeatherUI();
+                    document.getElementById('weatherLoading').style.display = 'none';
+                    document.getElementById('weatherContent').style.display = 'block';
+                    document.getElementById('weatherCard').classList.remove('loading');
+                    if (state.weather.lat && state.weather.lon) {
+                        reverseGeocode(state.weather.lat, state.weather.lon);
+                    }
+                    checkWeatherWarning();
+                }
+                
                 weightInput.value = state.weight || 70;
                 startBtn.disabled = true;
                 pauseBtn.disabled = false;
@@ -1255,17 +1714,15 @@ async function loadWeather() {
                 
                 document.getElementById('mapContainer').classList.add('active');
                 
-                // Обновляем отображение
                 distanceEl.textContent = totalDistance.toFixed(2);
                 maxSpeedEl.textContent = maxSpeedValue.toFixed(1);
                 elevationEl.textContent = Math.round(totalElevation);
                 
-                // Перезапускаем таймер
                 startTimer();
+                startWeatherAutoUpdate();
                 
-                // Перезапускаем GPS БЕЗ запроса разрешения (используем существующий watchId если есть)
                 if (locationPermissionGranted && !gpsAlreadyRequested) {
-                    startGPSWatch(false); // false = не запрашивать разрешение
+                    startGPSWatch(false);
                 }
                 
                 updateGoalDisplay();
@@ -1280,13 +1737,11 @@ async function loadWeather() {
         
         // Запуск GPS без повторного запроса разрешения
         function startGPSWatch(requestPermission = true) {
-            // Если watchId уже активен, не создаем новый
             if (watchId !== null) {
                 console.log('GPS watch уже активен, не перезапускаем');
                 return;
             }
             
-            // Если разрешение уже было получено и флаг установлен, не запрашиваем снова
             if (gpsAlreadyRequested && !requestPermission) {
                 console.log('Разрешение уже получено ранее, пропускаем запрос');
             }
@@ -1297,12 +1752,11 @@ async function loadWeather() {
             }
             
             if (!locationPermissionGranted) {
-                tg.showAlert('❌ Доступ к геолокации запрещен. Разрешите в настройках (️)');
+                tg.showAlert('❌ Доступ к геолокации запрещен. Разрешите в настройках (⚙️)');
                 showSettings();
                 return;
             }
             
-            // Устанавливаем флаг, что GPS запрашивался
             gpsAlreadyRequested = true;
             
             try {
@@ -1334,12 +1788,10 @@ async function loadWeather() {
                 return;
             }
             
-            // Запрос Wake Lock
             if (settings.wakeLock) {
                 await requestWakeLock();
             }
             
-            // Сброс переменных
             totalDistance = 0;
             maxSpeedValue = 0;
             totalElevation = 0;
@@ -1349,17 +1801,18 @@ async function loadWeather() {
             elapsedTime = 0;
             startTime = Date.now();
             goalAchieved = false;
+            weatherFetchedForWorkout = false;
             
             isTracking = true;
             isPaused = false;
             
-            // Запуск GPS
             startGPSWatch(true);
             
             document.getElementById('mapContainer').classList.add('active');
             setTimeout(initMap, 100);
             
             startTimer();
+            startWeatherAutoUpdate();
             
             startBtn.disabled = true;
             pauseBtn.disabled = false;
@@ -1368,6 +1821,25 @@ async function loadWeather() {
             pauseBtn.textContent = '⏸️ Пауза';
             statusBar.textContent = '🟢 GPS активен - отслеживание';
             statusBar.classList.remove('inactive', 'paused');
+            
+            // Загружаем погоду из кэша сразу
+            const cachedWeather = localStorage.getItem(WEATHER_CACHE_KEY);
+            if (cachedWeather) {
+                try {
+                    currentWeather = JSON.parse(cachedWeather);
+                    // Проверяем, что кэш свежий (не старше 30 минут)
+                    if (Date.now() - currentWeather.timestamp < 30 * 60 * 1000) {
+                        updateWeatherUI();
+                        document.getElementById('weatherLoading').style.display = 'none';
+                        document.getElementById('weatherContent').style.display = 'block';
+                        document.getElementById('weatherCard').classList.remove('loading');
+                        if (currentWeather.lat && currentWeather.lon) {
+                            reverseGeocode(currentWeather.lat, currentWeather.lon);
+                        }
+                        checkWeatherWarning();
+                    }
+                } catch (e) {}
+            }
             
             tg.HapticFeedback.notificationOccurred('success');
         }
@@ -1382,7 +1854,6 @@ async function loadWeather() {
             }).addTo(map);
             routeLine = L.polyline([], {color: '#667eea', weight: 4}).addTo(map);
             
-            // Если есть сохраненные точки маршрута, отображаем их
             if (routePoints.length > 0) {
                 routeLine.setLatLngs(routePoints);
                 if (routePoints.length > 1) {
@@ -1426,6 +1897,23 @@ async function loadWeather() {
             
             lastPosition = { lat, lon };
             lastElevation = altitude;
+            lastWeatherCoords = { lat, lon };
+            
+            // Загружаем погоду при первом получении координат
+            if (!weatherFetchedForWorkout) {
+                weatherFetchedForWorkout = true;
+                fetchWeather(lat, lon);
+            } else {
+                // Обновляем погоду если сместились более чем на 5 км
+                if (currentWeather && currentWeather.lat && currentWeather.lon) {
+                    const distFromLastWeather = calculateDistance(
+                        currentWeather.lat, currentWeather.lon, lat, lon
+                    );
+                    if (distFromLastWeather > 5) {
+                        fetchWeather(lat, lon);
+                    }
+                }
+            }
             
             const speedKmh = speed ? parseFloat((speed * 3.6).toFixed(1)) : 0;
             
@@ -1447,7 +1935,6 @@ async function loadWeather() {
             updateGoalDisplay();
             checkGoals();
             
-            // Сохраняем состояние при каждом обновлении позиции
             saveGPSState();
         }
         
@@ -1527,9 +2014,15 @@ async function loadWeather() {
             const distanceStr = totalDistance.toFixed(2);
             const caloriesStr = calculateCalories(totalDistance, parseFloat(weightInput.value) || 70);
             
+            let weatherStr = '';
+            if (currentWeather) {
+                const info = getWeatherInfo(currentWeather.weatherCode);
+                weatherStr = `\n${info.icon} ${currentWeather.temp}°C, ${info.desc.toLowerCase()}`;
+            }
+            
             tg.showPopup({
                 title: 'Завершить тренировку?',
-                message: `📏 ${distanceStr} км\n⏱️ ${durationStr}\n🔥 ${caloriesStr} ккал\n\nТренировка будет сохранена.`,
+                message: `📏 ${distanceStr} км\n⏱️ ${durationStr}\n🔥 ${caloriesStr} ккал${weatherStr}\n\nТренировка будет сохранена.`,
                 buttons: [
                     {id: 'save', type: 'default', text: '💾 Сохранить'},
                     {id: 'cancel', type: 'cancel', text: 'Продолжить'}
@@ -1551,13 +2044,28 @@ async function loadWeather() {
                 calories: calculateCalories(totalDistance, weight),
                 elevation: totalElevation,
                 weight: weight,
-                route: routePoints
+                route: routePoints,
+                weather: currentWeather ? {
+                    temp: currentWeather.temp,
+                    feelsLike: currentWeather.feelsLike,
+                    humidity: currentWeather.humidity,
+                    windSpeed: currentWeather.windSpeed,
+                    weatherCode: currentWeather.weatherCode,
+                    lat: currentWeather.lat,
+                    lon: currentWeather.lon
+                } : null
             };
             
             workouts.unshift(workout);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
             
-            tg.showAlert(`✅ Тренировка сохранена!\n\n ${totalDistance.toFixed(2)} км\n️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал`);
+            let weatherInfo = '';
+            if (currentWeather) {
+                const info = getWeatherInfo(currentWeather.weatherCode);
+                weatherInfo = `\n${info.icon} ${currentWeather.temp}°C`;
+            }
+            
+            tg.showAlert(`✅ Тренировка сохранена!\n\n📏 ${totalDistance.toFixed(2)} км\n⏱️ ${timeEl.textContent}\n🔥 ${workout.calories} ккал${weatherInfo}`);
             tg.HapticFeedback.notificationOccurred('success');
             
             resetTracking();
@@ -1568,7 +2076,7 @@ async function loadWeather() {
                 title: 'Сбросить тренировку?',
                 message: '⚠️ Все данные будут потеряны!',
                 buttons: [
-                    {id: 'reset', type: 'destructive', text: '️ Сбросить'},
+                    {id: 'reset', type: 'destructive', text: '🗑️ Сбросить'},
                     {id: 'cancel', type: 'cancel', text: 'Отмена'}
                 ]
             }, (btnId) => {
@@ -1586,6 +2094,7 @@ async function loadWeather() {
                 clearInterval(timerInterval);
             }
             
+            stopWeatherAutoUpdate();
             releaseWakeLock();
             
             isTracking = false;
@@ -1599,7 +2108,8 @@ async function loadWeather() {
             startTime = null;
             routePoints = [];
             goalAchieved = false;
-            gpsAlreadyRequested = false; // Сбрасываем флаг
+            gpsAlreadyRequested = false;
+            weatherFetchedForWorkout = false;
             
             document.getElementById('mapContainer').classList.remove('active');
             
@@ -1645,23 +2155,37 @@ async function loadWeather() {
                 const durationMinutes = Math.floor((workout.duration % 3600000) / 60000);
                 const hasRoute = workout.route && workout.route.length > 0;
                 
+                let weatherHtml = '';
+                if (workout.weather) {
+                    const info = getWeatherInfo(workout.weather.weatherCode);
+                    weatherHtml = `
+                        <div class="workout-weather">
+                            <span>${info.icon}</span>
+                            <span>${workout.weather.temp}°C, ${info.desc.toLowerCase()}</span>
+                            <span>💨 ${workout.weather.windSpeed} м/с</span>
+                            <span>💧 ${workout.weather.humidity}%</span>
+                        </div>
+                    `;
+                }
+                
                 return `
                     <div class="workout-item">
                         <div class="workout-header">
                             <div class="workout-date">${dateStr} ${timeStr}</div>
                             <div class="workout-actions">
                                 ${hasRoute ? `<button class="workout-btn btn-map" onclick="showWorkoutMap(${workout.id})">🗺️ Карта</button>` : ''}
-                                <button class="workout-btn btn-delete" onclick="deleteWorkout(${workout.id})">️</button>
+                                <button class="workout-btn btn-delete" onclick="deleteWorkout(${workout.id})">🗑️</button>
                             </div>
                         </div>
                         <div class="workout-stats">
-                            <div class="workout-stat"> ${workout.distance.toFixed(2)} км</div>
+                            <div class="workout-stat">📏 ${workout.distance.toFixed(2)} км</div>
                             <div class="workout-stat">⏱️ ${durationHours}ч ${durationMinutes}м</div>
                             <div class="workout-stat">⚡ ${workout.avgSpeed} км/ч</div>
                             <div class="workout-stat">🔥 ${workout.calories} ккал</div>
                             <div class="workout-stat">⛰️ ${Math.round(workout.elevation)} м</div>
                             <div class="workout-stat">🚀 ${workout.maxSpeed} км/ч</div>
                         </div>
+                        ${weatherHtml}
                     </div>
                 `;
             }).join('');
@@ -1720,7 +2244,7 @@ async function loadWeather() {
         
         function clearAllData() {
             tg.showPopup({
-                title: '️ Очистить все данные?',
+                title: '⚠️ Очистить все данные?',
                 message: 'Будут удалены ВСЕ тренировки и настройки. Это действие нельзя отменить!',
                 buttons: [
                     {id: 'clear', type: 'destructive', text: 'Удалить всё'},
@@ -1732,16 +2256,26 @@ async function loadWeather() {
                     localStorage.removeItem(SETTINGS_KEY);
                     localStorage.removeItem(PERMISSION_KEY);
                     localStorage.removeItem(GPS_STATE_KEY);
+                    localStorage.removeItem(WEATHER_CACHE_KEY);
                     sessionStorage.removeItem(GPS_STATE_KEY);
                     workouts = [];
                     settings = {
                         locationPermission: true,
-                        wakeLock: true
+                        wakeLock: true,
+                        weatherAutoUpdate: true,
+                        weatherWarnings: true
                     };
                     locationPermissionGranted = true;
                     gpsAlreadyRequested = false;
+                    currentWeather = null;
                     tg.showAlert('Все данные очищены');
                     showWorkout();
+                    // Возвращаем блок погоды в исходное состояние
+                    document.getElementById('weatherCard').classList.add('loading');
+                    document.getElementById('weatherLoading').style.display = 'block';
+                    document.getElementById('weatherLoading').textContent = '⏳ Загрузка погоды...';
+                    document.getElementById('weatherContent').style.display = 'none';
+                    document.getElementById('weatherLocationText').textContent = 'Определение местоположения...';
                 }
             });
         }
@@ -1766,6 +2300,24 @@ async function loadWeather() {
             const maxSpeedWorkout = workouts.reduce((max, w) => w.maxSpeed > max.maxSpeed ? w : max, workouts[0]);
             const maxCalories = workouts.reduce((max, w) => w.calories > max.calories ? w : max, workouts[0]);
             
+            // Средняя температура по тренировкам
+            const workoutsWithWeather = workouts.filter(w => w.weather);
+            let avgTempHtml = '';
+            if (workoutsWithWeather.length > 0) {
+                const avgTemp = Math.round(
+                    workoutsWithWeather.reduce((sum, w) => sum + w.weather.temp, 0) / workoutsWithWeather.length
+                );
+                avgTempHtml = `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <div class="record-title">🌡️ Средняя температура</div>
+                            <div class="record-value">За все тренировки</div>
+                        </div>
+                        <div class="record-badge">${avgTemp}°C</div>
+                    </div>
+                `;
+            }
+            
             document.getElementById('recordsList').innerHTML = `
                 <div class="record-item">
                     <div class="record-info">
@@ -1783,11 +2335,12 @@ async function loadWeather() {
                 </div>
                 <div class="record-item">
                     <div class="record-info">
-                        <div class="record-title"> Больше калорий</div>
+                        <div class="record-title">🔥 Больше калорий</div>
                         <div class="record-value">${new Date(maxCalories.date).toLocaleDateString('ru-RU')}</div>
                     </div>
                     <div class="record-badge">${maxCalories.calories} ккал</div>
                 </div>
+                ${avgTempHtml}
             `;
         }
         
@@ -1832,25 +2385,21 @@ async function loadWeather() {
             statusBar.textContent = message;
         }
         
-        // ВАЖНО: Обработка видимости страницы - НЕ перезапускаем GPS
+        // Обработка видимости страницы
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                // Приложение свернуто - сохраняем состояние
                 console.log('Приложение свернуто, сохраняем состояние GPS');
                 saveGPSState();
             } else {
-                // Приложение развернуто - НЕ запрашиваем разрешение повторно
                 console.log('Приложение развернуто, восстанавливаем состояние');
                 
-                // Если тренировка активна, просто продолжаем
                 if (isTracking && watchId !== null) {
                     console.log('GPS watch уже активен, продолжаем работу');
-                    // Просто обновляем UI
                     if (isPaused) {
                         statusBar.textContent = '⏸️ На паузе';
                         statusBar.classList.add('paused');
                     } else {
-                        statusBar.textContent = ' GPS активен - отслеживание';
+                        statusBar.textContent = '🟢 GPS активен - отслеживание';
                         statusBar.classList.remove('paused');
                     }
                 }
@@ -1869,6 +2418,26 @@ async function loadWeather() {
             const restored = restoreGPSState();
             if (restored) {
                 console.log('Состояние тренировки восстановлено');
+            } else {
+                // Если тренировка не активна, пробуем загрузить погоду по умолчанию
+                // (через геолокацию браузера)
+                if (navigator.geolocation && locationPermissionGranted) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            fetchWeather(pos.coords.latitude, pos.coords.longitude);
+                        },
+                        (err) => {
+                            console.log('Не удалось получить позицию для погоды:', err);
+                            // Показываем сообщение что погода будет доступна после старта
+                            document.getElementById('weatherLoading').textContent = 
+                                '📍 Погода загрузится при старте тренировки';
+                        },
+                        { enableHighAccuracy: false, timeout: 5000 }
+                    );
+                } else {
+                    document.getElementById('weatherLoading').textContent = 
+                        '📍 Погода загрузится при старте тренировки';
+                }
             }
         });
     </script>
